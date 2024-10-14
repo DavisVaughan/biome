@@ -1,0 +1,1508 @@
+//! Generated file, do not edit by hand, see `xtask/codegen`
+
+#![allow(clippy::enum_variant_names)]
+#![allow(clippy::match_like_matches_macro)]
+use crate::{
+    macros::map_syntax_node,
+    RLanguage as Language, RSyntaxElement as SyntaxElement,
+    RSyntaxElementChildren as SyntaxElementChildren,
+    RSyntaxKind::{self as SyntaxKind, *},
+    RSyntaxList as SyntaxList, RSyntaxNode as SyntaxNode, RSyntaxToken as SyntaxToken,
+};
+use biome_rowan::{support, AstNode, RawSyntaxKind, SyntaxKindSet, SyntaxResult};
+#[allow(unused)]
+use biome_rowan::{
+    AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
+    AstSeparatedListNodesIterator,
+};
+use serde::ser::SerializeSeq;
+use serde::{Serialize, Serializer};
+use std::fmt::{Debug, Formatter};
+#[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
+#[doc = r" the slots are not statically known."]
+#[allow(dead_code)]
+pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RDoubleValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RDoubleValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RDoubleValueFields {
+        RDoubleValueFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for RDoubleValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RDoubleValueFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RFunctionDefinition {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RFunctionDefinition {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RFunctionDefinitionFields {
+        RFunctionDefinitionFields {
+            function_token: self.function_token(),
+            parameters: self.parameters(),
+            body: self.body(),
+        }
+    }
+    pub fn function_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn parameters(&self) -> SyntaxResult<RParameters> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn body(&self) -> SyntaxResult<AnyRExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for RFunctionDefinition {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RFunctionDefinitionFields {
+    pub function_token: SyntaxResult<SyntaxToken>,
+    pub parameters: SyntaxResult<RParameters>,
+    pub body: SyntaxResult<AnyRExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RIdentifier {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RIdentifier {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RIdentifierFields {
+        RIdentifierFields {
+            name_token: self.name_token(),
+        }
+    }
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for RIdentifier {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RIdentifierFields {
+    pub name_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RIntegerValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RIntegerValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RIntegerValueFields {
+        RIntegerValueFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for RIntegerValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RIntegerValueFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RLogicalValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RLogicalValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RLogicalValueFields {
+        RLogicalValueFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for RLogicalValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RLogicalValueFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RNullValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RNullValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RNullValueFields {
+        RNullValueFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for RNullValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RNullValueFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RParameter {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RParameter {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RParameterFields {
+        RParameterFields {
+            r_identifier: self.r_identifier(),
+        }
+    }
+    pub fn r_identifier(&self) -> SyntaxResult<RIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+impl Serialize for RParameter {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RParameterFields {
+    pub r_identifier: SyntaxResult<RIdentifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RParameters {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RParameters {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RParametersFields {
+        RParametersFields {
+            l_paren_token: self.l_paren_token(),
+            items: self.items(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn items(&self) -> RParameterList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for RParameters {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RParametersFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub items: RParameterList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RRoot {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RRootFields {
+        RRootFields {
+            bom_token: self.bom_token(),
+            expressions: self.expressions(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn bom_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn expressions(&self) -> RExpressionList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for RRoot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RRootFields {
+    pub bom_token: Option<SyntaxToken>,
+    pub expressions: RExpressionList,
+    pub eof_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RStringValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RStringValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RStringValueFields {
+        RStringValueFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for RStringValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RStringValueFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyRExpression {
+    RBogusValue(RBogusValue),
+    RDoubleValue(RDoubleValue),
+    RFunctionDefinition(RFunctionDefinition),
+    RIdentifier(RIdentifier),
+    RIntegerValue(RIntegerValue),
+    RLogicalValue(RLogicalValue),
+    RNullValue(RNullValue),
+    RStringValue(RStringValue),
+}
+impl AnyRExpression {
+    pub fn as_r_bogus_value(&self) -> Option<&RBogusValue> {
+        match &self {
+            AnyRExpression::RBogusValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_r_double_value(&self) -> Option<&RDoubleValue> {
+        match &self {
+            AnyRExpression::RDoubleValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_r_function_definition(&self) -> Option<&RFunctionDefinition> {
+        match &self {
+            AnyRExpression::RFunctionDefinition(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_r_identifier(&self) -> Option<&RIdentifier> {
+        match &self {
+            AnyRExpression::RIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_r_integer_value(&self) -> Option<&RIntegerValue> {
+        match &self {
+            AnyRExpression::RIntegerValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_r_logical_value(&self) -> Option<&RLogicalValue> {
+        match &self {
+            AnyRExpression::RLogicalValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_r_null_value(&self) -> Option<&RNullValue> {
+        match &self {
+            AnyRExpression::RNullValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_r_string_value(&self) -> Option<&RStringValue> {
+        match &self {
+            AnyRExpression::RStringValue(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyRParameter {
+    RBogusParameter(RBogusParameter),
+    RParameter(RParameter),
+}
+impl AnyRParameter {
+    pub fn as_r_bogus_parameter(&self) -> Option<&RBogusParameter> {
+        match &self {
+            AnyRParameter::RBogusParameter(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_r_parameter(&self) -> Option<&RParameter> {
+        match &self {
+            AnyRParameter::RParameter(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+impl AstNode for RDoubleValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_DOUBLE_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_DOUBLE_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RDoubleValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RDoubleValue")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<RDoubleValue> for SyntaxNode {
+    fn from(n: RDoubleValue) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RDoubleValue> for SyntaxElement {
+    fn from(n: RDoubleValue) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for RFunctionDefinition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_FUNCTION_DEFINITION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_FUNCTION_DEFINITION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RFunctionDefinition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RFunctionDefinition")
+            .field(
+                "function_token",
+                &support::DebugSyntaxResult(self.function_token()),
+            )
+            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+            .field("body", &support::DebugSyntaxResult(self.body()))
+            .finish()
+    }
+}
+impl From<RFunctionDefinition> for SyntaxNode {
+    fn from(n: RFunctionDefinition) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RFunctionDefinition> for SyntaxElement {
+    fn from(n: RFunctionDefinition) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for RIdentifier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_IDENTIFIER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_IDENTIFIER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RIdentifier")
+            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+            .finish()
+    }
+}
+impl From<RIdentifier> for SyntaxNode {
+    fn from(n: RIdentifier) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RIdentifier> for SyntaxElement {
+    fn from(n: RIdentifier) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for RIntegerValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_INTEGER_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_INTEGER_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RIntegerValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RIntegerValue")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<RIntegerValue> for SyntaxNode {
+    fn from(n: RIntegerValue) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RIntegerValue> for SyntaxElement {
+    fn from(n: RIntegerValue) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for RLogicalValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_LOGICAL_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_LOGICAL_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RLogicalValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RLogicalValue")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<RLogicalValue> for SyntaxNode {
+    fn from(n: RLogicalValue) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RLogicalValue> for SyntaxElement {
+    fn from(n: RLogicalValue) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for RNullValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_NULL_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_NULL_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RNullValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RNullValue")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<RNullValue> for SyntaxNode {
+    fn from(n: RNullValue) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RNullValue> for SyntaxElement {
+    fn from(n: RNullValue) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for RParameter {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_PARAMETER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_PARAMETER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RParameter")
+            .field(
+                "r_identifier",
+                &support::DebugSyntaxResult(self.r_identifier()),
+            )
+            .finish()
+    }
+}
+impl From<RParameter> for SyntaxNode {
+    fn from(n: RParameter) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RParameter> for SyntaxElement {
+    fn from(n: RParameter) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for RParameters {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_PARAMETERS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_PARAMETERS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RParameters")
+            .field(
+                "l_paren_token",
+                &support::DebugSyntaxResult(self.l_paren_token()),
+            )
+            .field("items", &self.items())
+            .field(
+                "r_paren_token",
+                &support::DebugSyntaxResult(self.r_paren_token()),
+            )
+            .finish()
+    }
+}
+impl From<RParameters> for SyntaxNode {
+    fn from(n: RParameters) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RParameters> for SyntaxElement {
+    fn from(n: RParameters) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for RRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(R_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RRoot")
+            .field(
+                "bom_token",
+                &support::DebugOptionalElement(self.bom_token()),
+            )
+            .field("expressions", &self.expressions())
+            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+            .finish()
+    }
+}
+impl From<RRoot> for SyntaxNode {
+    fn from(n: RRoot) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RRoot> for SyntaxElement {
+    fn from(n: RRoot) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for RStringValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_STRING_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_STRING_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RStringValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RStringValue")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<RStringValue> for SyntaxNode {
+    fn from(n: RStringValue) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RStringValue> for SyntaxElement {
+    fn from(n: RStringValue) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl From<RBogusValue> for AnyRExpression {
+    fn from(node: RBogusValue) -> AnyRExpression {
+        AnyRExpression::RBogusValue(node)
+    }
+}
+impl From<RDoubleValue> for AnyRExpression {
+    fn from(node: RDoubleValue) -> AnyRExpression {
+        AnyRExpression::RDoubleValue(node)
+    }
+}
+impl From<RFunctionDefinition> for AnyRExpression {
+    fn from(node: RFunctionDefinition) -> AnyRExpression {
+        AnyRExpression::RFunctionDefinition(node)
+    }
+}
+impl From<RIdentifier> for AnyRExpression {
+    fn from(node: RIdentifier) -> AnyRExpression {
+        AnyRExpression::RIdentifier(node)
+    }
+}
+impl From<RIntegerValue> for AnyRExpression {
+    fn from(node: RIntegerValue) -> AnyRExpression {
+        AnyRExpression::RIntegerValue(node)
+    }
+}
+impl From<RLogicalValue> for AnyRExpression {
+    fn from(node: RLogicalValue) -> AnyRExpression {
+        AnyRExpression::RLogicalValue(node)
+    }
+}
+impl From<RNullValue> for AnyRExpression {
+    fn from(node: RNullValue) -> AnyRExpression {
+        AnyRExpression::RNullValue(node)
+    }
+}
+impl From<RStringValue> for AnyRExpression {
+    fn from(node: RStringValue) -> AnyRExpression {
+        AnyRExpression::RStringValue(node)
+    }
+}
+impl AstNode for AnyRExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = RBogusValue::KIND_SET
+        .union(RDoubleValue::KIND_SET)
+        .union(RFunctionDefinition::KIND_SET)
+        .union(RIdentifier::KIND_SET)
+        .union(RIntegerValue::KIND_SET)
+        .union(RLogicalValue::KIND_SET)
+        .union(RNullValue::KIND_SET)
+        .union(RStringValue::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            R_BOGUS_VALUE
+                | R_DOUBLE_VALUE
+                | R_FUNCTION_DEFINITION
+                | R_IDENTIFIER
+                | R_INTEGER_VALUE
+                | R_LOGICAL_VALUE
+                | R_NULL_VALUE
+                | R_STRING_VALUE
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            R_BOGUS_VALUE => AnyRExpression::RBogusValue(RBogusValue { syntax }),
+            R_DOUBLE_VALUE => AnyRExpression::RDoubleValue(RDoubleValue { syntax }),
+            R_FUNCTION_DEFINITION => {
+                AnyRExpression::RFunctionDefinition(RFunctionDefinition { syntax })
+            }
+            R_IDENTIFIER => AnyRExpression::RIdentifier(RIdentifier { syntax }),
+            R_INTEGER_VALUE => AnyRExpression::RIntegerValue(RIntegerValue { syntax }),
+            R_LOGICAL_VALUE => AnyRExpression::RLogicalValue(RLogicalValue { syntax }),
+            R_NULL_VALUE => AnyRExpression::RNullValue(RNullValue { syntax }),
+            R_STRING_VALUE => AnyRExpression::RStringValue(RStringValue { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyRExpression::RBogusValue(it) => &it.syntax,
+            AnyRExpression::RDoubleValue(it) => &it.syntax,
+            AnyRExpression::RFunctionDefinition(it) => &it.syntax,
+            AnyRExpression::RIdentifier(it) => &it.syntax,
+            AnyRExpression::RIntegerValue(it) => &it.syntax,
+            AnyRExpression::RLogicalValue(it) => &it.syntax,
+            AnyRExpression::RNullValue(it) => &it.syntax,
+            AnyRExpression::RStringValue(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyRExpression::RBogusValue(it) => it.syntax,
+            AnyRExpression::RDoubleValue(it) => it.syntax,
+            AnyRExpression::RFunctionDefinition(it) => it.syntax,
+            AnyRExpression::RIdentifier(it) => it.syntax,
+            AnyRExpression::RIntegerValue(it) => it.syntax,
+            AnyRExpression::RLogicalValue(it) => it.syntax,
+            AnyRExpression::RNullValue(it) => it.syntax,
+            AnyRExpression::RStringValue(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyRExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyRExpression::RBogusValue(it) => std::fmt::Debug::fmt(it, f),
+            AnyRExpression::RDoubleValue(it) => std::fmt::Debug::fmt(it, f),
+            AnyRExpression::RFunctionDefinition(it) => std::fmt::Debug::fmt(it, f),
+            AnyRExpression::RIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyRExpression::RIntegerValue(it) => std::fmt::Debug::fmt(it, f),
+            AnyRExpression::RLogicalValue(it) => std::fmt::Debug::fmt(it, f),
+            AnyRExpression::RNullValue(it) => std::fmt::Debug::fmt(it, f),
+            AnyRExpression::RStringValue(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyRExpression> for SyntaxNode {
+    fn from(n: AnyRExpression) -> SyntaxNode {
+        match n {
+            AnyRExpression::RBogusValue(it) => it.into(),
+            AnyRExpression::RDoubleValue(it) => it.into(),
+            AnyRExpression::RFunctionDefinition(it) => it.into(),
+            AnyRExpression::RIdentifier(it) => it.into(),
+            AnyRExpression::RIntegerValue(it) => it.into(),
+            AnyRExpression::RLogicalValue(it) => it.into(),
+            AnyRExpression::RNullValue(it) => it.into(),
+            AnyRExpression::RStringValue(it) => it.into(),
+        }
+    }
+}
+impl From<AnyRExpression> for SyntaxElement {
+    fn from(n: AnyRExpression) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<RBogusParameter> for AnyRParameter {
+    fn from(node: RBogusParameter) -> AnyRParameter {
+        AnyRParameter::RBogusParameter(node)
+    }
+}
+impl From<RParameter> for AnyRParameter {
+    fn from(node: RParameter) -> AnyRParameter {
+        AnyRParameter::RParameter(node)
+    }
+}
+impl AstNode for AnyRParameter {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = RBogusParameter::KIND_SET.union(RParameter::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, R_BOGUS_PARAMETER | R_PARAMETER)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            R_BOGUS_PARAMETER => AnyRParameter::RBogusParameter(RBogusParameter { syntax }),
+            R_PARAMETER => AnyRParameter::RParameter(RParameter { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyRParameter::RBogusParameter(it) => &it.syntax,
+            AnyRParameter::RParameter(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyRParameter::RBogusParameter(it) => it.syntax,
+            AnyRParameter::RParameter(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyRParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyRParameter::RBogusParameter(it) => std::fmt::Debug::fmt(it, f),
+            AnyRParameter::RParameter(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyRParameter> for SyntaxNode {
+    fn from(n: AnyRParameter) -> SyntaxNode {
+        match n {
+            AnyRParameter::RBogusParameter(it) => it.into(),
+            AnyRParameter::RParameter(it) => it.into(),
+        }
+    }
+}
+impl From<AnyRParameter> for SyntaxElement {
+    fn from(n: AnyRParameter) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl std::fmt::Display for AnyRExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyRParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for RDoubleValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for RFunctionDefinition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for RIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for RIntegerValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for RLogicalValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for RNullValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for RParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for RParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for RRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for RStringValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct RBogus {
+    syntax: SyntaxNode,
+}
+impl RBogus {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for RBogus {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_BOGUS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_BOGUS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RBogus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RBogus")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<RBogus> for SyntaxNode {
+    fn from(n: RBogus) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RBogus> for SyntaxElement {
+    fn from(n: RBogus) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct RBogusParameter {
+    syntax: SyntaxNode,
+}
+impl RBogusParameter {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for RBogusParameter {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_BOGUS_PARAMETER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_BOGUS_PARAMETER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RBogusParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RBogusParameter")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<RBogusParameter> for SyntaxNode {
+    fn from(n: RBogusParameter) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RBogusParameter> for SyntaxElement {
+    fn from(n: RBogusParameter) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct RBogusValue {
+    syntax: SyntaxNode,
+}
+impl RBogusValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for RBogusValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_BOGUS_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_BOGUS_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RBogusValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RBogusValue")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<RBogusValue> for SyntaxNode {
+    fn from(n: RBogusValue) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RBogusValue> for SyntaxElement {
+    fn from(n: RBogusValue) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct RExpressionList {
+    syntax_list: SyntaxList,
+}
+impl RExpressionList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for RExpressionList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_EXPRESSION_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_EXPRESSION_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<RExpressionList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(RExpressionList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for RExpressionList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for RExpressionList {
+    type Language = Language;
+    type Node = AnyRExpression;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for RExpressionList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("RExpressionList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &RExpressionList {
+    type Item = AnyRExpression;
+    type IntoIter = AstNodeListIterator<Language, AnyRExpression>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for RExpressionList {
+    type Item = AnyRExpression;
+    type IntoIter = AstNodeListIterator<Language, AnyRExpression>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct RParameterList {
+    syntax_list: SyntaxList,
+}
+impl RParameterList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for RParameterList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_PARAMETER_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_PARAMETER_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<RParameterList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(RParameterList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for RParameterList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for RParameterList {
+    type Language = Language;
+    type Node = AnyRParameter;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for RParameterList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("RParameterList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for RParameterList {
+    type Item = SyntaxResult<AnyRParameter>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyRParameter>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &RParameterList {
+    type Item = SyntaxResult<AnyRParameter>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyRParameter>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone)]
+pub struct DebugSyntaxElementChildren(pub SyntaxElementChildren);
+impl Debug for DebugSyntaxElementChildren {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_list()
+            .entries(self.clone().0.map(DebugSyntaxElement))
+            .finish()
+    }
+}
+struct DebugSyntaxElement(SyntaxElement);
+impl Debug for DebugSyntaxElement {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match &self.0 {
+            SyntaxElement::Node(node) => {
+                map_syntax_node ! (node . clone () , node => std :: fmt :: Debug :: fmt (& node , f))
+            }
+            SyntaxElement::Token(token) => Debug::fmt(token, f),
+        }
+    }
+}
