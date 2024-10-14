@@ -1074,6 +1074,12 @@ version = "0.1.0"
 [[package]]
 name = "biome_r_syntax"
 version = "0.1.0"
+dependencies = [
+ "biome_rowan",
+ "biome_string_case",
+ "schemars",
+ "serde",
+]
 
 [[package]]
 name = "biome_rowan"
