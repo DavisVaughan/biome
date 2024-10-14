@@ -1,7 +1,28 @@
-use biome_parser::{diagnostic::ParseDiagnostic, lexer::{Lexer, LexerCheckpoint}};
+use biome_parser::{diagnostic::ParseDiagnostic, lexer::{LexContext, Lexer, LexerCheckpoint}};
 use biome_r_syntax::{RSyntaxKind, RSyntaxKind::*, TextSize};
 
 // TODO: Work on the lexer, figure out the connection to tree-sitter
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
+pub enum RLexContext {
+    /// Default context: no particular rules are applied to the lexer logic.
+    #[default]
+    Regular,
+}
+
+impl LexContext for RLexContext {
+    /// Returns true if this is [RLexContext::Regular]
+    fn is_regular(&self) -> bool {
+        matches!(self, RLexContext::Regular)
+    }
+}
+
+/// Context in which the [RReLexContext]'s current should be re-lexed.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum RReLexContext {
+    #[allow(dead_code)]
+    Regular,
+}
 
 pub(crate) struct RLexer<'src> {
     /// Source text
