@@ -1068,6 +1068,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_r_factory"
+version = "0.1.0"
+
+[[package]]
+name = "biome_r_syntax"
+version = "0.1.0"
+
+[[package]]
 name = "biome_rowan"
 version = "0.5.7"
 dependencies = [

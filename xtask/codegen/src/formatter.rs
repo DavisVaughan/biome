@@ -826,6 +826,9 @@ fn get_node_concept(
 
             // TODO: implement formatter
             LanguageKind::Yaml => NodeConcept::Auxiliary,
+
+            // TODO: implement formatter
+            LanguageKind::R => NodeConcept::Auxiliary,
         }
     }
 }
@@ -892,6 +895,7 @@ impl LanguageKind {
             LanguageKind::Html => "HtmlFormatter",
             LanguageKind::Yaml => "YamlFormatter",
             LanguageKind::Markdown => "DemoFormatter",
+            LanguageKind::R => "RFormatter",
         };
 
         Ident::new(name, Span::call_site())
@@ -907,6 +911,7 @@ impl LanguageKind {
             LanguageKind::Html => "HtmlFormatContext",
             LanguageKind::Yaml => "YamlFormatContext",
             LanguageKind::Markdown => "DemoFormatterContext",
+            LanguageKind::R => "RFormatterContext",
         };
 
         Ident::new(name, Span::call_site())
