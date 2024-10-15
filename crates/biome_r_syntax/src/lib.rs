@@ -24,20 +24,6 @@ impl From<RSyntaxKind> for u16 {
     }
 }
 
-impl RSyntaxKind {
-    pub fn is_comments(self) -> bool {
-        matches!(
-            self,
-            RSyntaxKind::COMMENT
-        )
-    }
-
-    #[inline]
-    pub const fn is_keyword(self) -> bool {
-        matches!(self, T![function])
-    }
-}
-
 impl biome_rowan::SyntaxKind for RSyntaxKind {
     const TOMBSTONE: Self = RSyntaxKind::TOMBSTONE;
     const EOF: Self = RSyntaxKind::EOF;
@@ -82,7 +68,7 @@ impl biome_rowan::SyntaxKind for RSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        matches!(self, RSyntaxKind::NEWLINE | RSyntaxKind::WHITESPACE)
+        matches!(self, RSyntaxKind::NEWLINE | RSyntaxKind::WHITESPACE | RSyntaxKind::COMMENT)
     }
 
     fn to_string(&self) -> Option<&'static str> {
@@ -98,12 +84,8 @@ impl TryFrom<RSyntaxKind> for TriviaPieceKind {
             match value {
                 RSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
                 RSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
-                _ => unreachable!("Not Trivia"),
-            }
-        } else if value.is_comments() {
-            match value {
                 RSyntaxKind::COMMENT => Ok(TriviaPieceKind::SingleLineComment),
-                _ => unreachable!("Not Comment"),
+                _ => unreachable!("Not Trivia"),
             }
         } else {
             Err(())
