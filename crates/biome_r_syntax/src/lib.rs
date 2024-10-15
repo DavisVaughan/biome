@@ -43,8 +43,9 @@ impl biome_rowan::SyntaxKind for RSyntaxKind {
             | RSyntaxKind::R_LOGICAL_VALUE
             | RSyntaxKind::R_NULL_VALUE
             | RSyntaxKind::R_BOGUS_VALUE => RSyntaxKind::R_BOGUS_VALUE,
-            RSyntaxKind::R_PARAMETER
-            | RSyntaxKind::R_BOGUS_PARAMETER => RSyntaxKind::R_BOGUS_PARAMETER,
+            RSyntaxKind::R_PARAMETER | RSyntaxKind::R_BOGUS_PARAMETER => {
+                RSyntaxKind::R_BOGUS_PARAMETER
+            }
             _ => RSyntaxKind::R_BOGUS,
         }
     }
@@ -68,7 +69,10 @@ impl biome_rowan::SyntaxKind for RSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        matches!(self, RSyntaxKind::NEWLINE | RSyntaxKind::WHITESPACE | RSyntaxKind::COMMENT)
+        matches!(
+            self,
+            RSyntaxKind::NEWLINE | RSyntaxKind::WHITESPACE | RSyntaxKind::COMMENT
+        )
     }
 
     fn to_string(&self) -> Option<&'static str> {

@@ -15,8 +15,7 @@ impl RFileSource {
     // This list should be SORTED!
     // Source: https://github.com/github-linguist/linguist/blob/4ac734c15a96f9e16fd12330d0cb8de82274f700/lib/linguist/languages.yml#L5682-L5701
     // Note: we shouldn't include machine generated files
-    const WELL_KNOWN_R_FILES: &'static [&'static str] =
-        &[".R", ".r"];
+    const WELL_KNOWN_R_FILES: &'static [&'static str] = &[".R", ".r"];
 
     pub fn r() -> Self {
         Self {
@@ -25,9 +24,7 @@ impl RFileSource {
     }
 
     pub fn is_well_known_r_file(file_name: &str) -> bool {
-        Self::WELL_KNOWN_R_FILES
-            .binary_search(&file_name)
-            .is_ok()
+        Self::WELL_KNOWN_R_FILES.binary_search(&file_name).is_ok()
     }
 
     /// Try to return the R file source corresponding to this file name from well-known files

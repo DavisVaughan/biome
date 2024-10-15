@@ -9,9 +9,7 @@ pub const R_KINDS_SRC: KindsSrc = KindsSrc {
         ("[", "L_BRACK"),
         ("]", "R_BRACK"),
     ],
-    keywords: &[
-        "function"
-    ],
+    keywords: &["function"],
     literals: &[
         "R_INTEGER_VALUE",
         "R_DOUBLE_VALUE",
@@ -19,12 +17,7 @@ pub const R_KINDS_SRC: KindsSrc = KindsSrc {
         "R_LOGICAL_VALUE",
         "R_NULL_VALUE",
     ],
-    tokens: &[
-        "NEWLINE",
-        "WHITESPACE",
-        "IDENT",
-        "COMMENT"
-    ],
+    tokens: &["NEWLINE", "WHITESPACE", "IDENT", "COMMENT"],
     nodes: &[
         "R_ROOT",
         "R_IDENTIFIER",

@@ -8,8 +8,8 @@ use crate::js_kinds_src::JS_KINDS_SRC;
 use crate::json_kinds_src::JSON_KINDS_SRC;
 use crate::kind_src::KindsSrc;
 use crate::markdown_kinds_src::MARKDOWN_KINDS_SRC;
-use crate::yaml_kinds_src::YAML_KINDS_SRC;
 use crate::r_kinds_src::R_KINDS_SRC;
+use crate::yaml_kinds_src::YAML_KINDS_SRC;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
 
