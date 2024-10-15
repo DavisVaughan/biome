@@ -16,6 +16,8 @@ biome_r_syntax      = { workspace = true }
 biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true }
 tracing             = { workspace = true }
+tree-sitter         = { workspace = true }
+tree-sitter-r       = { workspace = true }
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]
