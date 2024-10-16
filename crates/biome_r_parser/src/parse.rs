@@ -63,7 +63,10 @@ impl RWalk {
     }
 
     fn walk(&mut self) {
-        for event in self.ast.root_node().preorder() {
+        let root = self.ast.root_node();
+        let mut iter = root.preorder();
+
+        while let Some(event) = iter.next() {
             match event {
                 WalkEvent::Enter(node) => {
                     match node.syntax_kind() {
