@@ -3,7 +3,7 @@ use crate::{diagnostic::ParseDiagnostic, lexer::LexerCheckpoint};
 use biome_rowan::{SyntaxKind, TextRange, TextSize, TriviaPieceKind};
 
 /// A comment or a whitespace trivia in the source code.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Trivia {
     /// The kind of the trivia token.
     kind: TriviaPieceKind,
