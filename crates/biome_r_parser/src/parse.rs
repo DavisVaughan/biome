@@ -2,11 +2,16 @@ use biome_parser::event::Event;
 use biome_parser::prelude::ParseDiagnostic;
 use biome_parser::prelude::Trivia;
 use biome_r_syntax::RSyntaxKind;
+use biome_rowan::syntax::Preorder;
 use biome_rowan::TextRange;
 use biome_rowan::TextSize;
 use tree_sitter::Node;
 use tree_sitter::Tree;
 use tree_sitter::TreeCursor;
+
+use crate::treesitter::NodeType;
+use crate::treesitter::NodeTypeExt;
+use crate::treesitter::WalkEvent;
 
 pub enum Direction {
     Up,
@@ -116,6 +121,9 @@ impl RWalk {
     fn as_syntax_kind(kind: &str) -> RSyntaxKind {
         match kind {
             "function_definition" => RSyntaxKind::R_FUNCTION_DEFINITION,
+            "binary_operator" => RSyntaxKind::R_BINARY_EXPRESSION,
+            "integer" => RSyntaxKind::R_INTEGER_VALUE,
+            "float" => RSyntaxKind::R_DOUBLE_VALUE,
             _ => panic!("Not yet implemented"),
         }
     }
@@ -124,7 +132,42 @@ impl RWalk {
         let root = self.ast.root_node();
         let mut cursor = root.walk();
 
+        for event in root.preorder() {
+            match event {
+                WalkEvent::Enter(node) => {
+                    if is_node(node) {
+                        self.parse.start(node_kind(node));
+                    }
+                }
+                WalkEvent::Leave(node) => {
+                    if is_node(node) {
+                        self.parse.finish();
+                    } else {
+                        // TODO!: Do some research into how to correctly propagate errors
+                        // into a `ParseError` type or something.
+                        // `ParseError::ConversionError(TypedError)`??
+                        self.parse
+                            .token(node_kind(node), node.end_byte().try_into().unwrap());
+                    }
+                }
+            }
+        }
+
         self.parse.start(RSyntaxKind::R_ROOT);
+
+        // 1 + 1 + 1
+        // 1^2^3
+        //
+        // (2 + 3)
+        //
+        // {
+        //   2 + 2  # comment
+        //
+        //   2 + 2
+        // }
+        //
+        // "string"
+        //
 
         // TODO!: We will probably want to "remember" the `previous_node`
         // for the purpose of computing `Trivia`. We may need a `stack` of
@@ -132,10 +175,10 @@ impl RWalk {
         // so that we only compute a `Trivia` diff between nodes on the same
         // branch "level" of the tree
 
-        while let (Some(node), direction) = Self::dfs_next(&mut cursor) {
-            // TODO!: If `node` is a leaf, we want to push an `Event::Token`,
-            // not open a new start()
+        // let skip = None;
+        // skip = Some(node);
 
+        while let (Some(node), direction) = Self::dfs_next(&mut cursor) {
             // TODO!: When we go `Up`, we may have had to go up >1 branches of
             // the tree, meaning we need to `finish()` >1 events. The
             // `Direction::Up` enum variant should probably take an integer value
@@ -146,8 +189,15 @@ impl RWalk {
                 // We got to `node` by going further down into the tree,
                 // emit a new `Start` event
                 Direction::Down => {
-                    let kind = Self::as_syntax_kind(node.kind());
-                    self.parse.start(kind);
+                    if is_node(node) {
+                        self.parse.start(node_kind(node));
+                    } else {
+                        // TODO!: Do some research into how to correctly propagate errors
+                        // into a `ParseError` type or something.
+                        // `ParseError::ConversionError(TypedError)`??
+                        self.parse
+                            .token(node_kind(node), node.end_byte().try_into().unwrap());
+                    }
                 }
 
                 // We got to `node` by walking up the tree and then moving
@@ -166,6 +216,8 @@ impl RWalk {
 
     // TODO!: I think the depth first search algorithm is right here, but not tested yet
     fn dfs_next<'tree>(cursor: &mut TreeCursor<'tree>) -> (Option<Node<'tree>>, Direction) {
+        // let stack = vec![];
+
         loop {
             if cursor.goto_first_child() {
                 return (Some(cursor.node()), Direction::Down);
@@ -187,6 +239,26 @@ impl RWalk {
                 }
             }
         }
+    }
+}
+
+fn is_node(x: Node) -> bool {
+    match x.node_type() {
+        NodeType::BinaryOperator(_) => true,
+        NodeType::FunctionDefinition => true,
+        NodeType::Integer => false,
+        NodeType::Float => false,
+        _ => todo!(),
+    }
+}
+
+fn node_kind(x: Node) -> RSyntaxKind {
+    match x.node_type() {
+        NodeType::BinaryOperator(_) => RSyntaxKind::R_BINARY_EXPRESSION,
+        NodeType::FunctionDefinition => RSyntaxKind::R_FUNCTION_DEFINITION,
+        NodeType::Integer => RSyntaxKind::R_INTEGER_VALUE,
+        NodeType::Float => RSyntaxKind::R_DOUBLE_VALUE,
+        _ => todo!(),
     }
 }
 
@@ -212,6 +284,10 @@ impl RParse {
         });
     }
 
+    fn token(&mut self, kind: RSyntaxKind, end: TextSize) {
+        self.push_event(Event::Token { kind, end });
+    }
+
     fn finish(&mut self) {
         self.push_event(Event::Finish);
     }
@@ -230,5 +306,15 @@ impl RParse {
 
     fn drain(self) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiagnostic>) {
         (self.events, self.trivia, self.errors)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse() {
+        parse("1 + 1");
     }
 }

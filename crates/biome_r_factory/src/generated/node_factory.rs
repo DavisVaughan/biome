@@ -6,6 +6,20 @@ use biome_r_syntax::{
     RSyntaxElement as SyntaxElement, RSyntaxNode as SyntaxNode, RSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
+pub fn r_binary_expression(
+    left: AnyRExpression,
+    operator_token_token: SyntaxToken,
+    right: AnyRExpression,
+) -> RBinaryExpression {
+    RBinaryExpression::unwrap_cast(SyntaxNode::new_detached(
+        RSyntaxKind::R_BINARY_EXPRESSION,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(operator_token_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
 pub fn r_double_value(value_token: SyntaxToken) -> RDoubleValue {
     RDoubleValue::unwrap_cast(SyntaxNode::new_detached(
         RSyntaxKind::R_DOUBLE_VALUE,
