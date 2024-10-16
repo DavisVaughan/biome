@@ -9,7 +9,7 @@ use biome_rowan::{SyntaxKind, TextSize};
 
 /// Events emitted by the Parser, these events are later
 /// made into a syntax tree with `process` into TreeSink.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Event<K: SyntaxKind> {
     /// This event signifies the start of the node.
     /// It should be either abandoned (in which case the

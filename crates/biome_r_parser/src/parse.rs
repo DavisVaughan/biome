@@ -147,7 +147,34 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse() {
-        parse("1 + 1");
+    fn test_parse_smoke_test() {
+        let (events, _trivia, _errors) = parse("1+1");
+
+        let expect = vec![
+            Event::Start {
+                kind: RSyntaxKind::R_ROOT,
+                forward_parent: None,
+            },
+            Event::Start {
+                kind: RSyntaxKind::R_BINARY_EXPRESSION,
+                forward_parent: None,
+            },
+            Event::Token {
+                kind: RSyntaxKind::R_DOUBLE_VALUE,
+                end: TextSize::from(1),
+            },
+            Event::Token {
+                kind: RSyntaxKind::PLUS,
+                end: TextSize::from(2),
+            },
+            Event::Token {
+                kind: RSyntaxKind::R_DOUBLE_VALUE,
+                end: TextSize::from(3),
+            },
+            Event::Finish,
+            Event::Finish,
+        ];
+
+        assert_eq!(events, expect);
     }
 }
