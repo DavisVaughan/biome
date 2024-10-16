@@ -19,6 +19,7 @@ pub enum RSyntaxKind {
     R_CURLY,
     L_BRACK,
     R_BRACK,
+    PLUS,
     FUNCTION_KW,
     R_INTEGER_VALUE,
     R_DOUBLE_VALUE,
@@ -47,7 +48,7 @@ use self::RSyntaxKind::*;
 impl RSyntaxKind {
     pub const fn is_punct(self) -> bool {
         match self {
-            SEMICOLON | COMMA | L_CURLY | R_CURLY | L_BRACK | R_BRACK => true,
+            SEMICOLON | COMMA | L_CURLY | R_CURLY | L_BRACK | R_BRACK | PLUS => true,
             _ => false,
         }
     }
@@ -80,6 +81,7 @@ impl RSyntaxKind {
             R_CURLY => "}",
             L_BRACK => "[",
             R_BRACK => "]",
+            PLUS => "+",
             FUNCTION_KW => "function",
             R_STRING_VALUE => "string value",
             _ => return None,
@@ -89,4 +91,4 @@ impl RSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [;] => { $ crate :: RSyntaxKind :: SEMICOLON } ; [,] => { $ crate :: RSyntaxKind :: COMMA } ; ['{'] => { $ crate :: RSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: RSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: RSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: RSyntaxKind :: R_BRACK } ; [function] => { $ crate :: RSyntaxKind :: FUNCTION_KW } ; [ident] => { $ crate :: RSyntaxKind :: IDENT } ; [EOF] => { $ crate :: RSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: RSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: RSyntaxKind :: HASH } ; }
+macro_rules ! T { [;] => { $ crate :: RSyntaxKind :: SEMICOLON } ; [,] => { $ crate :: RSyntaxKind :: COMMA } ; ['{'] => { $ crate :: RSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: RSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: RSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: RSyntaxKind :: R_BRACK } ; [+] => { $ crate :: RSyntaxKind :: PLUS } ; [function] => { $ crate :: RSyntaxKind :: FUNCTION_KW } ; [ident] => { $ crate :: RSyntaxKind :: IDENT } ; [EOF] => { $ crate :: RSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: RSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: RSyntaxKind :: HASH } ; }

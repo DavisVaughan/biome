@@ -377,6 +377,7 @@ fn node_syntax_kind(x: &Node) -> NodeSyntaxKind {
         "}" => NodeSyntaxKind::Leaf(RSyntaxKind::R_CURLY),
         "[" => NodeSyntaxKind::Leaf(RSyntaxKind::L_BRACK),
         "]" => NodeSyntaxKind::Leaf(RSyntaxKind::R_BRACK),
+        "+" => NodeSyntaxKind::Leaf(RSyntaxKind::PLUS),
 
         // Comment
         "comment" => NodeSyntaxKind::Comment,
