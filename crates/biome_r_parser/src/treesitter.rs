@@ -1,3 +1,4 @@
+use biome_r_syntax::RSyntaxKind;
 use tree_sitter::{Node, TreeCursor};
 
 #[derive(Debug, PartialEq)]
@@ -352,127 +353,52 @@ impl<'tree> Iterator for Preorder<'tree> {
     }
 }
 
-pub trait NodeTypeExt: Sized {
-    fn node_type(&self) -> NodeType;
-    fn preorder(&self) -> Preorder;
+pub enum NodeSyntaxKind {
+    Leaf(RSyntaxKind),
+    Node(RSyntaxKind),
+    Comment,
+}
 
-    fn is_program(&self) -> bool;
-    fn is_identifier(&self) -> bool;
-    fn is_string(&self) -> bool;
-    fn is_identifier_or_string(&self) -> bool;
-    fn is_keyword(&self) -> bool;
-    fn is_call(&self) -> bool;
-    fn is_subset(&self) -> bool;
-    fn is_subset2(&self) -> bool;
-    fn is_comment(&self) -> bool;
-    fn is_braced_expression(&self) -> bool;
-    fn is_function_definition(&self) -> bool;
-    fn is_if_statement(&self) -> bool;
-    fn is_argument(&self) -> bool;
-    fn is_arguments(&self) -> bool;
-    fn is_namespace_operator(&self) -> bool;
-    fn is_namespace_internal_operator(&self) -> bool;
-    fn is_unary_operator(&self) -> bool;
-    fn is_binary_operator(&self) -> bool;
+fn node_syntax_kind(x: &Node) -> NodeSyntaxKind {
+    match x.kind() {
+        // Nodes
+        "program" => NodeSyntaxKind::Node(RSyntaxKind::R_ROOT),
+        "binary_operator" => NodeSyntaxKind::Node(RSyntaxKind::R_BINARY_EXPRESSION),
+        "function_definition" => NodeSyntaxKind::Node(RSyntaxKind::R_FUNCTION_DEFINITION),
+
+        // Leaves
+        "integer" => NodeSyntaxKind::Leaf(RSyntaxKind::R_INTEGER_VALUE),
+        "float" => NodeSyntaxKind::Leaf(RSyntaxKind::R_DOUBLE_VALUE),
+        "string" => NodeSyntaxKind::Leaf(RSyntaxKind::R_STRING_VALUE),
+        "true" => NodeSyntaxKind::Leaf(RSyntaxKind::R_LOGICAL_VALUE),
+        "false" => NodeSyntaxKind::Leaf(RSyntaxKind::R_LOGICAL_VALUE),
+        "null" => NodeSyntaxKind::Leaf(RSyntaxKind::R_NULL_VALUE),
+        "{" => NodeSyntaxKind::Leaf(RSyntaxKind::L_CURLY),
+        "}" => NodeSyntaxKind::Leaf(RSyntaxKind::R_CURLY),
+        "[" => NodeSyntaxKind::Leaf(RSyntaxKind::L_BRACK),
+        "]" => NodeSyntaxKind::Leaf(RSyntaxKind::R_BRACK),
+
+        // Comment
+        "comment" => NodeSyntaxKind::Comment,
+
+        _ => panic!("Not implemented"),
+    }
+}
+
+pub trait NodeTypeExt: Sized {
+    fn syntax_kind(&self) -> NodeSyntaxKind;
+    fn preorder(&self) -> Preorder;
 }
 
 impl NodeTypeExt for Node<'_> {
-    fn node_type(&self) -> NodeType {
-        node_type(self)
+    fn syntax_kind(&self) -> NodeSyntaxKind {
+        node_syntax_kind(self)
     }
 
     fn preorder(&self) -> Preorder {
         Preorder::new(self.clone())
     }
-
-    fn is_program(&self) -> bool {
-        self.node_type() == NodeType::Program
-    }
-
-    fn is_identifier(&self) -> bool {
-        self.node_type() == NodeType::Identifier
-    }
-
-    fn is_string(&self) -> bool {
-        self.node_type() == NodeType::String
-    }
-
-    // This combination is particularly common
-    fn is_identifier_or_string(&self) -> bool {
-        matches!(self.node_type(), NodeType::Identifier | NodeType::String)
-    }
-
-    fn is_keyword(&self) -> bool {
-        matches!(
-            self.node_type(),
-            NodeType::Return
-                | NodeType::Next
-                | NodeType::Break
-                | NodeType::True
-                | NodeType::False
-                | NodeType::Null
-                | NodeType::Inf
-                | NodeType::Nan
-                | NodeType::Na(_)
-        )
-    }
-
-    fn is_call(&self) -> bool {
-        self.node_type() == NodeType::Call
-    }
-
-    fn is_subset(&self) -> bool {
-        self.node_type() == NodeType::Subset
-    }
-
-    fn is_subset2(&self) -> bool {
-        self.node_type() == NodeType::Subset2
-    }
-
-    fn is_comment(&self) -> bool {
-        self.node_type() == NodeType::Comment
-    }
-
-    fn is_braced_expression(&self) -> bool {
-        self.node_type() == NodeType::BracedExpression
-    }
-
-    fn is_function_definition(&self) -> bool {
-        self.node_type() == NodeType::FunctionDefinition
-    }
-
-    fn is_if_statement(&self) -> bool {
-        self.node_type() == NodeType::IfStatement
-    }
-
-    fn is_argument(&self) -> bool {
-        self.node_type() == NodeType::Argument
-    }
-
-    fn is_arguments(&self) -> bool {
-        self.node_type() == NodeType::Arguments
-    }
-
-    fn is_namespace_operator(&self) -> bool {
-        matches!(self.node_type(), NodeType::NamespaceOperator(_))
-    }
-
-    fn is_namespace_internal_operator(&self) -> bool {
-        self.node_type() == NodeType::NamespaceOperator(NamespaceOperatorType::Internal)
-    }
-
-    fn is_unary_operator(&self) -> bool {
-        matches!(self.node_type(), NodeType::UnaryOperator(_))
-    }
-
-    fn is_binary_operator(&self) -> bool {
-        matches!(self.node_type(), NodeType::BinaryOperator(_))
-    }
 }
-
-// pub(crate) fn node_text(node: &Node, contents: &ropey::Rope) -> Option<String> {
-//     contents.node_slice(node).ok().map(|f| f.to_string())
-// }
 
 pub fn node_has_error_or_missing(node: &Node) -> bool {
     // According to the docs, `node.has_error()` should return `true`
@@ -481,30 +407,3 @@ pub fn node_has_error_or_missing(node: &Node) -> bool {
     // https://github.com/tree-sitter/tree-sitter/issues/3623
     node.is_error() || node.has_error()
 }
-
-// pub(crate) fn node_find_string<'a>(node: &'a Node) -> Option<Node<'a>> {
-//     // If we are on one of the following, we return the string parent:
-//     // - Anonymous node inside a string, like `"'"`
-//     // - `NodeType::StringContent`
-//     // - `NodeType::EscapeSequence`
-//     // Note that `ancestors()` is actually inclusive, so the original `node`
-//     // is also considered as a potential string here.
-//     node.ancestors().find(|node| node.is_string())
-// }
-
-// pub(crate) fn node_in_string(node: &Node) -> bool {
-//     node_find_string(node).is_some()
-// }
-
-// pub(crate) fn node_is_call(node: &Node, name: &str, contents: &ropey::Rope) -> bool {
-//     if !node.is_call() {
-//         return false;
-//     }
-//     let Some(fun) = node.child_by_field_name("function") else {
-//         return false;
-//     };
-//     let Some(fun) = node_text(&fun, contents) else {
-//         return false;
-//     };
-//     fun == name
-// }
