@@ -4,6 +4,8 @@ use biome_parser::prelude::Trivia;
 use biome_r_syntax::RSyntaxKind;
 use biome_rowan::TextRange;
 use biome_rowan::TextSize;
+use biome_rowan::TriviaPieceKind;
+use biome_unicode_table::Dispatch;
 use tree_sitter::Node;
 use tree_sitter::Tree;
 
@@ -24,7 +26,7 @@ pub fn parse(text: &str) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiag
     if root.has_error() {
         parse_failure(&root)
     } else {
-        parse_events(ast)
+        parse_events(ast, text)
     }
 }
 
@@ -41,28 +43,36 @@ fn parse_failure(root: &Node) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<Pars
     (events, trivia, errors)
 }
 
-fn parse_events(ast: Tree) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiagnostic>) {
-    let mut walker = RWalk::new(ast);
+fn parse_events(
+    ast: Tree,
+    text: &str,
+) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiagnostic>) {
+    let mut walker = RWalk::new(ast, text);
     walker.walk();
     walker.parse.drain()
 }
 
 /// Given an ast with absolutely no ERROR or MISSING nodes, let's walk that tree
 /// and collect our `trivia` and `events`.
-struct RWalk {
+struct RWalk<'src> {
     ast: Tree,
+    text: &'src str,
     parse: RParse,
 }
 
-impl RWalk {
-    fn new(ast: Tree) -> Self {
+impl<'src> RWalk<'src> {
+    fn new(ast: Tree, text: &'src str) -> Self {
         Self {
             ast,
+            text,
             parse: RParse::new(),
         }
     }
 
     fn walk(&mut self) {
+        let mut last_end = TextSize::from(0);
+        let mut before_first_token = true;
+
         let root = self.ast.root_node();
         let mut iter = root.preorder();
 
@@ -88,7 +98,17 @@ impl RWalk {
                             ()
                         }
                         NodeSyntaxKind::Leaf(kind) => {
-                            self.parse.token(kind, node.end_byte().try_into().unwrap());
+                            // TODO!: Don't unwrap()
+                            let this_start = TextSize::try_from(node.start_byte()).unwrap();
+                            let this_end = TextSize::try_from(node.end_byte()).unwrap();
+
+                            let gap = &self.text[usize::from(last_end)..usize::from(this_start)];
+
+                            self.parse.derive_trivia(gap, last_end, before_first_token);
+                            self.parse.token(kind, this_end);
+
+                            last_end = this_end;
+                            before_first_token = false;
                         }
                         NodeSyntaxKind::Node(_) => self.parse.finish(),
                     }
@@ -143,6 +163,135 @@ impl RParse {
     fn drain(self) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiagnostic>) {
         (self.events, self.trivia, self.errors)
     }
+
+    // TODO!: Probably lots of logic errors in `derive_trivia()` right now.
+    // It definitely isn't doing trailing vs leading right yet, I think I have
+    // some of it backwards! Add more tests as you fix bits of it.
+
+    // TODO!: Need to handle comments too. It will be like `derive_trivia()`
+    // but whitespace after the final token on a line but before a trailing
+    // comment is also considered trailing trivia (I think the trick to
+    // recognize is that any whitespace before a comment is considered trailing
+    // until you see your first newline)
+
+    // TODO!: Once the algorithm and tests are written, i want to see if it
+    // greatly simplifies by using a `peekable()` iterator!
+
+    /// Given:
+    /// - A slice of `text` starting at byte `start`
+    /// - Which only contains whitespace or newlines
+    /// - And represents a "gap" between two tokens
+    ///
+    /// Derive the implied stream of trivia that exists in that gap
+    ///
+    /// SAFETY: `last_end <= next_start`
+    /// SAFETY: `last_end` and `next_start` must define a range within `text`
+    fn derive_trivia(&mut self, text: &str, mut start: TextSize, before_first_token: bool) {
+        let mut iter = text.as_bytes().iter();
+
+        let mut end = start;
+
+        // Can't have trailing trivia before the first token, so if that's
+        // the case then all trivia is leading trivia and we skip this step.
+        if !before_first_token {
+            let trailing = true;
+
+            // All whitespace between two tokens is trailing until we hit the
+            // first `\r`, `\r\n`, or `\n`
+            while let Some(byte) = iter.next() {
+                if let b'\r' | b'\n' = byte {
+                    break;
+                }
+                end += TextSize::from(1);
+            }
+
+            if start != end {
+                let range = TextRange::new(start, end);
+                self.push_trivia(Trivia::new(TriviaPieceKind::Whitespace, range, trailing));
+                start = end;
+            }
+        }
+
+        // Now push all leading trivia
+        let trailing = false;
+
+        let mut in_whitespace = false;
+        let mut in_crlf = false;
+
+        while let Some(byte) = iter.next() {
+            end += TextSize::from(1);
+
+            if in_crlf {
+                in_crlf = false;
+
+                if let b'\n' = byte {
+                    // Finish out `\r\n`, then continue to next iteration
+                    let range = TextRange::new(start, end);
+                    self.push_trivia(Trivia::new(TriviaPieceKind::Newline, range, trailing));
+                    start = end;
+                    continue;
+                } else {
+                    // Finish out `\r`, then let `byte` fall through
+                    let range = TextRange::new(start, start + TextSize::from(1));
+                    self.push_trivia(Trivia::new(TriviaPieceKind::Newline, range, trailing));
+                    start = start + TextSize::from(1);
+                }
+            }
+
+            if in_whitespace {
+                if Self::is_whitespace(*byte) {
+                    // Continue stream of whitespace
+                    continue;
+                } else {
+                    // Finish out stream of whitespace, then let `byte` fall through
+                    in_whitespace = false;
+                    let range = TextRange::new(start, end - TextSize::from(1));
+                    self.push_trivia(Trivia::new(TriviaPieceKind::Whitespace, range, trailing));
+                    start = end - TextSize::from(1);
+                }
+            }
+
+            if Self::is_whitespace(*byte) {
+                in_whitespace = true;
+                continue;
+            }
+
+            if let b'\r' = byte {
+                in_crlf = true;
+                continue;
+            }
+
+            if let b'\n' = byte {
+                // Finish out `\n`
+                let range = TextRange::new(start, end);
+                self.push_trivia(Trivia::new(TriviaPieceKind::Newline, range, trailing));
+                start = end;
+                continue;
+            }
+
+            unreachable!("Detected non trivia character!");
+        }
+
+        if in_crlf {
+            // Finish out `\r` if it was the last character
+            let range = TextRange::new(start, end);
+            self.push_trivia(Trivia::new(TriviaPieceKind::Newline, range, trailing));
+        }
+
+        if in_whitespace {
+            // Finish out stream of whitespace if nothing came after it
+            let range = TextRange::new(start, end);
+            self.push_trivia(Trivia::new(TriviaPieceKind::Whitespace, range, trailing));
+        }
+    }
+
+    fn is_whitespace(byte: u8) -> bool {
+        // `WHS` maps newlines as "whitespace" but we handle that specially
+        match biome_unicode_table::lookup_byte(byte) {
+            Dispatch::WHS => byte != b'\r' && byte != b'\n',
+            _ => false,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -151,7 +300,7 @@ mod tests {
 
     #[test]
     fn test_parse_smoke_test() {
-        let (events, _trivia, _errors) = parse("1+1");
+        let (events, trivia, _errors) = parse("1+1");
 
         let expect = vec![
             Event::Start {
@@ -179,5 +328,46 @@ mod tests {
         ];
 
         assert_eq!(events, expect);
+        assert!(trivia.is_empty());
+    }
+
+    #[test]
+    fn test_parse_trivia_smoke_test() {
+        let (_events, trivia, _errors) = parse("1 + 1");
+
+        let expect = vec![
+            Trivia::new(
+                TriviaPieceKind::Whitespace,
+                TextRange::new(TextSize::from(1), TextSize::from(2)),
+                false,
+            ),
+            Trivia::new(
+                TriviaPieceKind::Whitespace,
+                TextRange::new(TextSize::from(3), TextSize::from(4)),
+                false,
+            ),
+        ];
+
+        assert_eq!(trivia, expect);
+    }
+
+    #[test]
+    fn test_parse_trivia_before_first_token() {
+        let (_events, trivia, _errors) = parse("  \n1");
+
+        let expect = vec![
+            Trivia::new(
+                TriviaPieceKind::Whitespace,
+                TextRange::new(TextSize::from(0), TextSize::from(2)),
+                false,
+            ),
+            Trivia::new(
+                TriviaPieceKind::Newline,
+                TextRange::new(TextSize::from(2), TextSize::from(3)),
+                false,
+            ),
+        ];
+
+        assert_eq!(trivia, expect);
     }
 }

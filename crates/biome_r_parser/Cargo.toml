@@ -15,6 +15,7 @@ biome_r_factory     = { workspace = true }
 biome_r_syntax      = { workspace = true }
 biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true }
+biome_unicode_table = { workspace = true }
 tracing             = { workspace = true }
 tree-sitter         = { workspace = true }
 tree-sitter-r       = { workspace = true }
