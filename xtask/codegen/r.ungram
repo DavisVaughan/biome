@@ -38,6 +38,13 @@ RRoot =
 RIdentifier =
 	name: 'ident'
 
+RBinaryExpression =
+    left: AnyRExpression
+    operator_token: (
+    	'+' | '-' | '*' | '/' | '%' | '**' | '^'
+		)
+    right: AnyRExpression
+
 // TODO: `\\` is not a valid Ident and causes issues with codegen
 RFunctionDefinition =
 	'function'
@@ -62,6 +69,7 @@ RExpressionList = AnyRExpression*
 
 AnyRExpression =
 	RIdentifier
+	| RBinaryExpression
 	| RFunctionDefinition
 	| RStringValue
 	| RIntegerValue

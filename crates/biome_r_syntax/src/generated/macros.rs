@@ -16,6 +16,10 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::RSyntaxNode::kind(&node) {
+                $crate::RSyntaxKind::R_BINARY_EXPRESSION => {
+                    let $pattern = unsafe { $crate::RBinaryExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::RSyntaxKind::R_DOUBLE_VALUE => {
                     let $pattern = unsafe { $crate::RDoubleValue::new_unchecked(node) };
                     $body

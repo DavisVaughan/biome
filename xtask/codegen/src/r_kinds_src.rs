@@ -21,6 +21,7 @@ pub const R_KINDS_SRC: KindsSrc = KindsSrc {
     nodes: &[
         "R_ROOT",
         "R_IDENTIFIER",
+        "R_BINARY_EXPRESSION",
         "R_FUNCTION_DEFINITION",
         "R_PARAMETERS",
         "R_PARAMETER_LIST",
