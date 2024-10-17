@@ -559,6 +559,7 @@ enum NodeDialect {
     Grit,
     Graphql,
     Html,
+    R,
 }
 
 impl NodeDialect {
@@ -572,6 +573,7 @@ impl NodeDialect {
             NodeDialect::Grit,
             NodeDialect::Graphql,
             NodeDialect::Html,
+            NodeDialect::R,
         ]
     }
 
@@ -589,6 +591,7 @@ impl NodeDialect {
             NodeDialect::Grit => "grit",
             NodeDialect::Graphql => "graphql",
             NodeDialect::Html => "html",
+            NodeDialect::R => "r",
         }
     }
 
@@ -602,6 +605,7 @@ impl NodeDialect {
             "Grit" => NodeDialect::Grit,
             "Graphql" => NodeDialect::Graphql,
             "Html" => NodeDialect::Html,
+            "R" => NodeDialect::R,
             _ => {
                 eprintln!("missing prefix {name}");
                 NodeDialect::Js
@@ -911,7 +915,7 @@ impl LanguageKind {
             LanguageKind::Html => "HtmlFormatContext",
             LanguageKind::Yaml => "YamlFormatContext",
             LanguageKind::Markdown => "DemoFormatterContext",
-            LanguageKind::R => "RFormatterContext",
+            LanguageKind::R => "RFormatContext",
         };
 
         Ident::new(name, Span::call_site())
