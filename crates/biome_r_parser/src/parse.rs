@@ -200,9 +200,10 @@ impl RParse {
         if !before_first_token {
             let mut trailing = false;
 
-            // FIXME!: `\r` is not a line ending?
             // All whitespace between two tokens is trailing until we hit the
-            // first `\r`, `\r\n`, or `\n`
+            // first `\r`, `\r\n`, or `\n`. A lone `\r` not attached to an `\n`
+            // should not happen in a well-formed file (unless inside a string
+            // token), so we just treat it as a `\r\n` line ending.
             while let Some(byte) = iter.peek() {
                 if let b'\r' | b'\n' = byte {
                     // We found a newline, so all trivia up to this point is
@@ -372,6 +373,14 @@ mod tests {
         assert_eq!(
             trivia("1 + \n1"),
             vec![ws(1, 2, false), ws(3, 4, true), nl(4, 5, false)]
+        );
+    }
+
+    #[test]
+    fn test_parse_trivia_trailing_crlf_test() {
+        assert_eq!(
+            trivia("1 + \r\n1"),
+            vec![ws(1, 2, false), ws(3, 4, true), nl(4, 6, false)]
         );
     }
 
