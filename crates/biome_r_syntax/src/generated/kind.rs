@@ -19,6 +19,8 @@ pub enum RSyntaxKind {
     R_CURLY,
     L_BRACK,
     R_BRACK,
+    L_PAREN,
+    R_PAREN,
     PLUS,
     FUNCTION_KW,
     R_INTEGER_VALUE,
@@ -48,7 +50,8 @@ use self::RSyntaxKind::*;
 impl RSyntaxKind {
     pub const fn is_punct(self) -> bool {
         match self {
-            SEMICOLON | COMMA | L_CURLY | R_CURLY | L_BRACK | R_BRACK | PLUS => true,
+            SEMICOLON | COMMA | L_CURLY | R_CURLY | L_BRACK | R_BRACK | L_PAREN | R_PAREN
+            | PLUS => true,
             _ => false,
         }
     }
@@ -81,6 +84,8 @@ impl RSyntaxKind {
             R_CURLY => "}",
             L_BRACK => "[",
             R_BRACK => "]",
+            L_PAREN => "(",
+            R_PAREN => ")",
             PLUS => "+",
             FUNCTION_KW => "function",
             R_STRING_VALUE => "string value",
@@ -91,4 +96,4 @@ impl RSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [;] => { $ crate :: RSyntaxKind :: SEMICOLON } ; [,] => { $ crate :: RSyntaxKind :: COMMA } ; ['{'] => { $ crate :: RSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: RSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: RSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: RSyntaxKind :: R_BRACK } ; [+] => { $ crate :: RSyntaxKind :: PLUS } ; [function] => { $ crate :: RSyntaxKind :: FUNCTION_KW } ; [ident] => { $ crate :: RSyntaxKind :: IDENT } ; [EOF] => { $ crate :: RSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: RSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: RSyntaxKind :: HASH } ; }
+macro_rules ! T { [;] => { $ crate :: RSyntaxKind :: SEMICOLON } ; [,] => { $ crate :: RSyntaxKind :: COMMA } ; ['{'] => { $ crate :: RSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: RSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: RSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: RSyntaxKind :: R_BRACK } ; ['('] => { $ crate :: RSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: RSyntaxKind :: R_PAREN } ; [+] => { $ crate :: RSyntaxKind :: PLUS } ; [function] => { $ crate :: RSyntaxKind :: FUNCTION_KW } ; [ident] => { $ crate :: RSyntaxKind :: IDENT } ; [EOF] => { $ crate :: RSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: RSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: RSyntaxKind :: HASH } ; }

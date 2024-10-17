@@ -8,6 +8,8 @@ pub const R_KINDS_SRC: KindsSrc = KindsSrc {
         ("}", "R_CURLY"),
         ("[", "L_BRACK"),
         ("]", "R_BRACK"),
+        ("(", "L_PAREN"),
+        (")", "R_PAREN"),
         ("+", "PLUS"),
     ],
     keywords: &["function"],
