@@ -115,7 +115,7 @@ impl<'src> RWalk<'src> {
                                 }
                             }
 
-                            // Comments are "single line" event if they are consecutive
+                            // Comments are "single line" even if they are consecutive
                             self.parse.trivia.push(Trivia::new(
                                 TriviaPieceKind::SingleLineComment,
                                 TextRange::new(this_start, this_end),
