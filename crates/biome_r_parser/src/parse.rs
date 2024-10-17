@@ -322,11 +322,11 @@ mod tests {
         )
     }
 
-    fn nl(start: u32, end: u32, trailing: bool) -> Trivia {
+    fn nl(start: u32, end: u32) -> Trivia {
         Trivia::new(
             TriviaPieceKind::Newline,
             TextRange::new(TextSize::from(start), TextSize::from(end)),
-            trailing,
+            false,
         )
     }
 
@@ -372,7 +372,7 @@ mod tests {
     fn test_parse_trivia_trailing_test() {
         assert_eq!(
             trivia("1 + \n1"),
-            vec![ws(1, 2, false), ws(3, 4, true), nl(4, 5, false)]
+            vec![ws(1, 2, false), ws(3, 4, true), nl(4, 5)]
         );
     }
 
@@ -380,12 +380,12 @@ mod tests {
     fn test_parse_trivia_trailing_crlf_test() {
         assert_eq!(
             trivia("1 + \r\n1"),
-            vec![ws(1, 2, false), ws(3, 4, true), nl(4, 6, false)]
+            vec![ws(1, 2, false), ws(3, 4, true), nl(4, 6)]
         );
     }
 
     #[test]
     fn test_parse_trivia_before_first_token() {
-        assert_eq!(trivia("  \n1"), vec![ws(0, 2, false), nl(2, 3, false)]);
+        assert_eq!(trivia("  \n1"), vec![ws(0, 2, false), nl(2, 3)]);
     }
 }
