@@ -430,26 +430,56 @@ mod tests {
     #[test]
     fn test_parse_trivia_comment_test() {
         assert_eq!(
-            trivia("1 # foo"),
-            vec![ws(1, 2, Pos::Trailing), cmt(2, 7, Pos::Trailing)]
+            trivia("1 #"),
+            vec![ws(1, 2, Pos::Trailing), cmt(2, 3, Pos::Trailing)]
+        );
+    }
+
+    #[test]
+    fn test_parse_trivia_comment_nothing_else_test() {
+        assert_eq!(trivia("#"), vec![cmt(0, 1, Pos::Leading)]);
+    }
+
+    #[test]
+    fn test_parse_trivia_comment_end_of_document_test() {
+        assert_eq!(trivia("1\n#"), vec![nl(1, 2), cmt(2, 3, Pos::Leading)]);
+    }
+
+    #[test]
+    fn test_parse_trivia_whitespace_between_comments_test() {
+        let text = "
+1 #
+#
+2
+"
+        .trim();
+        assert_eq!(
+            trivia(text),
+            vec![
+                ws(1, 2, Pos::Trailing),
+                cmt(2, 3, Pos::Trailing),
+                nl(3, 4),
+                cmt(4, 5, Pos::Leading),
+                nl(5, 6),
+            ]
         );
     }
 
     #[test]
     fn test_parse_trivia_comment_beginning_of_document_test() {
-        assert_eq!(trivia("# foo\n1"), vec![cmt(0, 5, Pos::Leading), nl(5, 6)]);
+        assert_eq!(trivia("#\n1"), vec![cmt(0, 1, Pos::Leading), nl(1, 2)]);
     }
 
     #[test]
     fn test_parse_trivia_comment_beginning_of_document_with_whitespace_test() {
         assert_eq!(
-            trivia(" \n \n# foo"),
+            trivia(" \n \n#"),
             vec![
                 ws(0, 1, Pos::Leading),
                 nl(1, 2),
                 ws(2, 3, Pos::Leading),
                 nl(3, 4),
-                cmt(4, 9, Pos::Leading),
+                cmt(4, 5, Pos::Leading),
             ]
         );
     }
