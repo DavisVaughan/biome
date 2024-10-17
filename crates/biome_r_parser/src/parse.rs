@@ -168,10 +168,6 @@ impl RParse {
         (self.events, self.trivia, self.errors)
     }
 
-    // TODO!: Probably lots of logic errors in `derive_trivia()` right now.
-    // It definitely isn't doing trailing vs leading right yet, I think I have
-    // some of it backwards! Add more tests as you fix bits of it.
-
     // TODO!: Need to handle comments too. It will be like `derive_trivia()`
     // but whitespace after the final token on a line but before a trailing
     // comment is also considered trailing trivia (I think the trick to
