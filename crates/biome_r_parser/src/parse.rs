@@ -102,6 +102,10 @@ impl<'src> RWalk<'src> {
                             let this_start = TextSize::try_from(node.start_byte()).unwrap();
                             let this_end = TextSize::try_from(node.end_byte()).unwrap();
 
+                            // TS gives us all tokens except trivia. So we know
+                            // all the relevant trivia tokens are laid out
+                            // between the last token's end and this token's
+                            // start.
                             let gap = &self.text[usize::from(last_end)..usize::from(this_start)];
 
                             self.parse.derive_trivia(gap, last_end, before_first_token);
@@ -191,11 +195,13 @@ impl RParse {
 
         let mut end = start;
 
-        // Can't have trailing trivia before the first token, so if that's
-        // the case then all trivia is leading trivia and we skip this step.
+        // First detect trailing trivia for the last token. Can't have trailing
+        // trivia before the first token, so if that's the case then all trivia
+        // is leading trivia and we skip this step.
         if !before_first_token {
             let trailing = true;
 
+            // FIXME!: `\r` is not a line ending?
             // All whitespace between two tokens is trailing until we hit the
             // first `\r`, `\r\n`, or `\n`
             while let Some(byte) = iter.next() {
