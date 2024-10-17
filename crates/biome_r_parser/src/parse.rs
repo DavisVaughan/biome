@@ -94,9 +94,35 @@ impl<'src> RWalk<'src> {
                 WalkEvent::Leave(node) => {
                     match node.syntax_kind() {
                         NodeSyntaxKind::Comment => {
-                            // TODO: Trivia for comments
-                            ()
+                            let this_start = TextSize::try_from(node.start_byte()).unwrap();
+                            let this_end = TextSize::try_from(node.end_byte()).unwrap();
+                            let gap = &self.text[usize::from(last_end)..usize::from(this_start)];
+
+                            let trailing;
+
+                            if gap.contains('\n') {
+                                // If the gap has a newline this is a leading comment
+                                trailing = false;
+                                self.parse.derive_trivia(gap, last_end, false);
+                            } else {
+                                // Otherwise we're just after a token and this is a trailing comment
+                                trailing = true;
+
+                                self.parse.trivia.push(Trivia::new(
+                                    TriviaPieceKind::Whitespace,
+                                    TextRange::new(last_end, this_start),
+                                    trailing,
+                                ));
+                            }
+
+                            // Comments are "single line" event if they are consecutive
+                            self.parse.trivia.push(Trivia::new(
+                                TriviaPieceKind::SingleLineComment,
+                                TextRange::new(this_start, this_end),
+                                trailing,
+                            ));
                         }
+
                         NodeSyntaxKind::Leaf(kind) => {
                             // TODO!: Don't unwrap()
                             let this_start = TextSize::try_from(node.start_byte()).unwrap();
@@ -114,6 +140,7 @@ impl<'src> RWalk<'src> {
                             last_end = this_end;
                             before_first_token = false;
                         }
+
                         NodeSyntaxKind::Node(_) => self.parse.finish(),
                     }
                 }
@@ -183,14 +210,14 @@ impl RParse {
     ///
     /// SAFETY: `last_end <= next_start`
     /// SAFETY: `last_end` and `next_start` must define a range within `text`
-    fn derive_trivia(&mut self, text: &str, mut start: TextSize, before_first_token: bool) {
+    fn derive_trivia(&mut self, text: &str, mut start: TextSize, only_leading: bool) {
         let mut iter = text.as_bytes().iter().peekable();
         let mut end = start;
 
         // First detect trailing trivia for the last token. Can't have trailing
         // trivia before the first token, so if that's the case then all trivia
         // is leading trivia and we skip this step.
-        if !before_first_token {
+        if !only_leading {
             let mut trailing = false;
 
             // All whitespace between two tokens is leading until we hit the
@@ -285,16 +312,21 @@ impl RParse {
 mod tests {
     use super::*;
 
+    enum Pos {
+        Leading,
+        Trailing,
+    }
+
     fn trivia(text: &str) -> Vec<Trivia> {
         let (_events, trivia, _errors) = parse(text);
         trivia
     }
 
-    fn ws(start: u32, end: u32, trailing: bool) -> Trivia {
+    fn ws(start: u32, end: u32, position: Pos) -> Trivia {
         Trivia::new(
             TriviaPieceKind::Whitespace,
             TextRange::new(TextSize::from(start), TextSize::from(end)),
-            trailing,
+            matches!(position, Pos::Trailing),
         )
     }
 
@@ -303,6 +335,14 @@ mod tests {
             TriviaPieceKind::Newline,
             TextRange::new(TextSize::from(start), TextSize::from(end)),
             false,
+        )
+    }
+
+    fn cmt(start: u32, end: u32, position: Pos) -> Trivia {
+        Trivia::new(
+            TriviaPieceKind::SingleLineComment,
+            TextRange::new(TextSize::from(start), TextSize::from(end)),
+            matches!(position, Pos::Trailing),
         )
     }
 
@@ -341,14 +381,22 @@ mod tests {
 
     #[test]
     fn test_parse_trivia_smoke_test() {
-        assert_eq!(trivia("1 + 1"), vec![ws(1, 2, false), ws(3, 4, false)]);
+        assert_eq!(
+            trivia("1 + 1"),
+            vec![ws(1, 2, Pos::Leading), ws(3, 4, Pos::Leading)]
+        );
     }
 
     #[test]
     fn test_parse_trivia_tab_test() {
         assert_eq!(
             trivia("1\t+\t\n\t1"),
-            vec![ws(1, 2, false), ws(3, 4, true), nl(4, 5), ws(5, 6, false)]
+            vec![
+                ws(1, 2, Pos::Leading),
+                ws(3, 4, Pos::Trailing),
+                nl(4, 5),
+                ws(5, 6, Pos::Leading)
+            ]
         );
     }
 
@@ -356,7 +404,7 @@ mod tests {
     fn test_parse_trivia_trailing_test() {
         assert_eq!(
             trivia("1 + \n1"),
-            vec![ws(1, 2, false), ws(3, 4, true), nl(4, 5)]
+            vec![ws(1, 2, Pos::Leading), ws(3, 4, Pos::Trailing), nl(4, 5)]
         );
     }
 
@@ -364,12 +412,20 @@ mod tests {
     fn test_parse_trivia_trailing_crlf_test() {
         assert_eq!(
             trivia("1 + \r\n1"),
-            vec![ws(1, 2, false), ws(3, 4, true), nl(4, 6)]
+            vec![ws(1, 2, Pos::Leading), ws(3, 4, Pos::Trailing), nl(4, 6)]
         );
     }
 
     #[test]
     fn test_parse_trivia_before_first_token() {
-        assert_eq!(trivia("  \n1"), vec![ws(0, 2, false), nl(2, 3)]);
+        assert_eq!(trivia("  \n1"), vec![ws(0, 2, Pos::Leading), nl(2, 3)]);
+    }
+
+    #[test]
+    fn test_parse_trivia_comment_test() {
+        assert_eq!(
+            trivia("1 # foo"),
+            vec![ws(1, 2, Pos::Trailing), cmt(2, 7, Pos::Trailing)]
+        );
     }
 }
