@@ -1072,6 +1072,15 @@ name = "biome_r_factory"
 version = "0.1.0"
 
 [[package]]
+name = "biome_r_formatter"
+version = "0.0.0"
+dependencies = [
+ "biome_formatter",
+ "biome_r_syntax",
+ "biome_rowan",
+]
+
+[[package]]
 name = "biome_r_parser"
 version = "0.1.0"
 dependencies = [
