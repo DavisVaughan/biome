@@ -9,12 +9,25 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_r_formatter"
 repository.workspace = true
-version              = "0.0.0"
+version              = "0.1.0"
 
 [dependencies]
 biome_formatter          = { workspace = true }
 biome_r_syntax           = { workspace = true }
 biome_rowan              = { workspace = true }
+
+[dev-dependencies]
+biome_formatter_test = { path = "../biome_formatter_test" }
+biome_fs             = { path = "../biome_fs" }
+biome_r_factory      = { path = "../biome_r_factory" }
+biome_r_parser       = { path = "../biome_r_parser" }
+biome_parser         = { path = "../biome_parser" }
+biome_service        = { path = "../biome_service" }
+countme              = { workspace = true, features = ["enable"] }
+iai                  = "0.1.1"
+quickcheck           = { workspace = true }
+quickcheck_macros    = { workspace = true }
+tests_macros         = { path = "../tests_macros" }
 
 [lints]
 workspace = true

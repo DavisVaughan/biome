@@ -14,8 +14,8 @@ use crate::context::RFormatContext;
 use crate::context::RFormatOptions;
 use crate::cst::FormatRSyntaxNode;
 
-mod comments;
-mod context;
+pub mod comments;
+pub mod context;
 mod cst;
 mod prelude;
 mod r;
