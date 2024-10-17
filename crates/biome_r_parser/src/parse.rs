@@ -369,6 +369,14 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_trivia_tab_test() {
+        assert_eq!(
+            trivia("1\t+\t\n\t1"),
+            vec![ws(1, 2, false), ws(3, 4, true), nl(4, 5), ws(5, 6, false)]
+        );
+    }
+
+    #[test]
     fn test_parse_trivia_trailing_test() {
         assert_eq!(
             trivia("1 + \n1"),
