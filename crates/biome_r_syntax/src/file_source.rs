@@ -2,7 +2,7 @@ use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
 use std::{ffi::OsStr, path::Path};
 
-#[cfg_attr(feature = "schema", derive(schemars::RSchema))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
