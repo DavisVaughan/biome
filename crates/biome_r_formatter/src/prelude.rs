@@ -1,2 +1,5 @@
-pub(crate) use crate::{RFormatContext, RFormatter};
-pub(crate) use biome_formatter::prelude::*;
+pub(crate) use crate::{
+    AsFormat as _, FormatNodeRule, FormattedIterExt, RFormatContext, RFormatter,
+};
+pub use biome_formatter::prelude::*;
+pub use biome_rowan::{AstNode as _, AstNodeList as _, AstSeparatedList as _};

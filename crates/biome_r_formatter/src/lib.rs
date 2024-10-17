@@ -18,6 +18,10 @@ mod comments;
 mod context;
 mod cst;
 mod prelude;
+mod r;
+
+#[rustfmt::skip]
+mod generated;
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {
