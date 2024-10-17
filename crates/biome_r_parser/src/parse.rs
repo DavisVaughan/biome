@@ -6,7 +6,6 @@ use biome_rowan::TextRange;
 use biome_rowan::TextSize;
 use biome_rowan::TriviaPieceKind;
 use biome_unicode_table::Dispatch;
-use tree_sitter::Node;
 use tree_sitter::Tree;
 
 use crate::treesitter::NodeSyntaxKind;
@@ -15,35 +14,32 @@ use crate::treesitter::WalkEvent;
 
 pub fn parse(text: &str) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiagnostic>) {
     let mut parser = tree_sitter::Parser::new();
-
     parser
         .set_language(&tree_sitter_r::LANGUAGE.into())
         .unwrap();
 
     let ast = parser.parse(text, None).unwrap();
-    let root = ast.root_node();
 
-    if root.has_error() {
-        parse_failure(&root)
-    } else {
-        parse_events(ast, text)
+    if ast.root_node().has_error() {
+        // TODO: In the long term we want an error resiliant parser.
+        // This would probably only be able to happen if we swap out tree sitter
+        // for a hand written recursive descent pratt parser using the Biome infra.
+        return parse_failure();
     }
+
+    parse_tree(ast, text)
 }
 
-fn parse_failure(root: &Node) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiagnostic>) {
+fn parse_failure() -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiagnostic>) {
     let events = vec![];
     let trivia = vec![];
-
-    let start = u32::try_from(root.start_byte()).unwrap();
-    let end = u32::try_from(root.end_byte()).unwrap();
-    let span = TextRange::new(TextSize::from(start), TextSize::from(end));
+    let span: Option<TextRange> = None;
     let error = ParseDiagnostic::new("Tree-sitter failed", span);
     let errors = vec![error];
-
     (events, trivia, errors)
 }
 
-fn parse_events(
+fn parse_tree(
     ast: Tree,
     text: &str,
 ) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiagnostic>) {
@@ -191,10 +187,6 @@ impl RParse {
 
     fn push_trivia(&mut self, trivia: Trivia) {
         self.trivia.push(trivia);
-    }
-
-    fn push_error(&mut self, error: ParseDiagnostic) {
-        self.errors.push(error);
     }
 
     fn drain(self) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiagnostic>) {
