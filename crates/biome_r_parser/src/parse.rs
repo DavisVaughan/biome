@@ -191,24 +191,28 @@ impl RParse {
     /// SAFETY: `last_end <= next_start`
     /// SAFETY: `last_end` and `next_start` must define a range within `text`
     fn derive_trivia(&mut self, text: &str, mut start: TextSize, before_first_token: bool) {
-        let mut iter = text.as_bytes().iter();
-
+        let mut iter = text.as_bytes().iter().peekable();
         let mut end = start;
 
         // First detect trailing trivia for the last token. Can't have trailing
         // trivia before the first token, so if that's the case then all trivia
         // is leading trivia and we skip this step.
         if !before_first_token {
-            let trailing = true;
+            let mut trailing = false;
 
             // FIXME!: `\r` is not a line ending?
             // All whitespace between two tokens is trailing until we hit the
             // first `\r`, `\r\n`, or `\n`
-            while let Some(byte) = iter.next() {
+            while let Some(byte) = iter.peek() {
                 if let b'\r' | b'\n' = byte {
+                    // We found a newline, so all trivia up to this point is
+                    // trailing to the last token. Don't advance the iterator so
+                    // that this newline may be processed as leading trivia.
+                    trailing = true;
                     break;
                 }
                 end += TextSize::from(1);
+                let _ = iter.next();
             }
 
             if start != end {
@@ -350,6 +354,31 @@ mod tests {
             Trivia::new(
                 TriviaPieceKind::Whitespace,
                 TextRange::new(TextSize::from(3), TextSize::from(4)),
+                false,
+            ),
+        ];
+
+        assert_eq!(trivia, expect);
+    }
+
+    #[test]
+    fn test_parse_trivia_trailing_test() {
+        let (_events, trivia, _errors) = parse("1 + \n1");
+
+        let expect = vec![
+            Trivia::new(
+                TriviaPieceKind::Whitespace,
+                TextRange::new(TextSize::from(1), TextSize::from(2)),
+                false,
+            ),
+            Trivia::new(
+                TriviaPieceKind::Whitespace,
+                TextRange::new(TextSize::from(3), TextSize::from(4)),
+                true,
+            ),
+            Trivia::new(
+                TriviaPieceKind::Newline,
+                TextRange::new(TextSize::from(4), TextSize::from(5)),
                 false,
             ),
         ];
