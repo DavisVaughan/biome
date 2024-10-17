@@ -174,9 +174,6 @@ impl RParse {
     // recognize is that any whitespace before a comment is considered trailing
     // until you see your first newline)
 
-    // TODO!: Once the algorithm and tests are written, i want to see if it
-    // greatly simplifies by using a `peekable()` iterator!
-
     /// Given:
     /// - A slice of `text` starting at byte `start`
     /// - Which only contains whitespace or newlines
@@ -196,16 +193,21 @@ impl RParse {
         if !before_first_token {
             let mut trailing = false;
 
-            // All whitespace between two tokens is trailing until we hit the
-            // first `\r`, `\r\n`, or `\n`. A lone `\r` not attached to an `\n`
-            // should not happen in a well-formed file (unless inside a string
-            // token), so we just treat it as a `\r\n` line ending.
+            // All whitespace between two tokens is leading until we hit the
+            // first `\r`, `\r\n`, or `\n`, at which point the whitespace is
+            // considered trailing of the last token, and the newline and
+            // everything after it is considered leading of the next token.
+            // A lone `\r` not attached to an `\n` should not happen in a
+            // well-formed file (unless inside a string token), so we just
+            // treat it as a `\r\n` line ending.
             while let Some(byte) = iter.peek() {
                 if let b'\r' | b'\n' = byte {
                     // We found a newline, so all trivia up to this point is
                     // trailing to the last token. Don't advance the iterator so
                     // that this newline may be processed as leading trivia.
                     trailing = true;
+
+                    // Break and fallthrough
                     break;
                 }
                 end += TextSize::from(1);
@@ -217,51 +219,44 @@ impl RParse {
                 self.push_trivia(Trivia::new(TriviaPieceKind::Whitespace, range, trailing));
                 start = end;
             }
+
+            // Fallthrough so that our current byte can be processed as leading
+            // trivia
         }
 
         // Now push all leading trivia
         let trailing = false;
 
-        let mut in_crlf = false;
-
         while let Some(byte) = iter.next() {
             end += TextSize::from(1);
 
             if Self::is_whitespace(*byte) {
-                while let Some(byte) = iter.peek() {
-                    if Self::is_whitespace(**byte) {
-                        let _ = iter.next();
-                        end += TextSize::from(1);
-                    } else {
-                        break;
-                    }
+                // Finish out stream of whitespace
+                while let Some(_) = iter.next_if(|byte| Self::is_whitespace(**byte)) {
+                    end += TextSize::from(1);
                 }
-
                 let range = TextRange::new(start, end);
                 self.push_trivia(Trivia::new(TriviaPieceKind::Whitespace, range, trailing));
                 start = end;
                 continue;
             }
 
-            if in_crlf {
-                in_crlf = false;
-
-                if let b'\n' = byte {
-                    // Finish out `\r\n`, then continue to next iteration
-                    let range = TextRange::new(start, end);
-                    self.push_trivia(Trivia::new(TriviaPieceKind::Newline, range, trailing));
-                    start = end;
-                    continue;
-                } else {
-                    // Finish out `\r`, then let `byte` fall through
-                    let range = TextRange::new(start, start + TextSize::from(1));
-                    self.push_trivia(Trivia::new(TriviaPieceKind::Newline, range, trailing));
-                    start = start + TextSize::from(1);
-                }
-            }
-
             if let b'\r' = byte {
-                in_crlf = true;
+                match iter.next_if(|byte| **byte == b'\n') {
+                    Some(_) => {
+                        // Finish out `\r\n`
+                        end += TextSize::from(1);
+                        let range = TextRange::new(start, end);
+                        self.push_trivia(Trivia::new(TriviaPieceKind::Newline, range, trailing));
+                        start = end;
+                    }
+                    None => {
+                        // Finish out `\r`
+                        let range = TextRange::new(start, end);
+                        self.push_trivia(Trivia::new(TriviaPieceKind::Newline, range, trailing));
+                        start = end;
+                    }
+                }
                 continue;
             }
 
@@ -274,12 +269,6 @@ impl RParse {
             }
 
             unreachable!("Detected non trivia character!");
-        }
-
-        if in_crlf {
-            // Finish out `\r` if it was the last character
-            let range = TextRange::new(start, end);
-            self.push_trivia(Trivia::new(TriviaPieceKind::Newline, range, trailing));
         }
     }
 
