@@ -308,6 +308,27 @@ impl RParse {
 mod tests {
     use super::*;
 
+    fn trivia(text: &str) -> Vec<Trivia> {
+        let (_events, trivia, _errors) = parse(text);
+        trivia
+    }
+
+    fn ws(start: u32, end: u32, trailing: bool) -> Trivia {
+        Trivia::new(
+            TriviaPieceKind::Whitespace,
+            TextRange::new(TextSize::from(start), TextSize::from(end)),
+            trailing,
+        )
+    }
+
+    fn nl(start: u32, end: u32, trailing: bool) -> Trivia {
+        Trivia::new(
+            TriviaPieceKind::Newline,
+            TextRange::new(TextSize::from(start), TextSize::from(end)),
+            trailing,
+        )
+    }
+
     #[test]
     fn test_parse_smoke_test() {
         let (events, trivia, _errors) = parse("1+1");
@@ -343,66 +364,19 @@ mod tests {
 
     #[test]
     fn test_parse_trivia_smoke_test() {
-        let (_events, trivia, _errors) = parse("1 + 1");
-
-        let expect = vec![
-            Trivia::new(
-                TriviaPieceKind::Whitespace,
-                TextRange::new(TextSize::from(1), TextSize::from(2)),
-                false,
-            ),
-            Trivia::new(
-                TriviaPieceKind::Whitespace,
-                TextRange::new(TextSize::from(3), TextSize::from(4)),
-                false,
-            ),
-        ];
-
-        assert_eq!(trivia, expect);
+        assert_eq!(trivia("1 + 1"), vec![ws(1, 2, false), ws(3, 4, false)]);
     }
 
     #[test]
     fn test_parse_trivia_trailing_test() {
-        let (_events, trivia, _errors) = parse("1 + \n1");
-
-        let expect = vec![
-            Trivia::new(
-                TriviaPieceKind::Whitespace,
-                TextRange::new(TextSize::from(1), TextSize::from(2)),
-                false,
-            ),
-            Trivia::new(
-                TriviaPieceKind::Whitespace,
-                TextRange::new(TextSize::from(3), TextSize::from(4)),
-                true,
-            ),
-            Trivia::new(
-                TriviaPieceKind::Newline,
-                TextRange::new(TextSize::from(4), TextSize::from(5)),
-                false,
-            ),
-        ];
-
-        assert_eq!(trivia, expect);
+        assert_eq!(
+            trivia("1 + \n1"),
+            vec![ws(1, 2, false), ws(3, 4, true), nl(4, 5, false)]
+        );
     }
 
     #[test]
     fn test_parse_trivia_before_first_token() {
-        let (_events, trivia, _errors) = parse("  \n1");
-
-        let expect = vec![
-            Trivia::new(
-                TriviaPieceKind::Whitespace,
-                TextRange::new(TextSize::from(0), TextSize::from(2)),
-                false,
-            ),
-            Trivia::new(
-                TriviaPieceKind::Newline,
-                TextRange::new(TextSize::from(2), TextSize::from(3)),
-                false,
-            ),
-        ];
-
-        assert_eq!(trivia, expect);
+        assert_eq!(trivia("  \n1"), vec![ws(0, 2, false), nl(2, 3, false)]);
     }
 }
