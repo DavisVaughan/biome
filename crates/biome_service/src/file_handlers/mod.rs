@@ -5,6 +5,7 @@ use self::{
 use crate::diagnostics::{QueryDiagnostic, SearchError};
 pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
 use crate::file_handlers::graphql::GraphqlFileHandler;
+use crate::file_handlers::r::RFileHandler;
 pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
 pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
 use crate::settings::Settings;
@@ -37,6 +38,7 @@ use biome_js_syntax::{
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
+use biome_r_syntax::RFileSource;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrLikeExtension;
 
@@ -55,6 +57,7 @@ mod grit;
 mod html;
 mod javascript;
 mod json;
+mod r;
 mod svelte;
 mod unknown;
 mod vue;
@@ -70,6 +73,7 @@ pub enum DocumentFileSource {
     Graphql(GraphqlFileSource),
     Html(HtmlFileSource),
     Grit(GritFileSource),
+    R(RFileSource),
     #[default]
     Unknown,
 }
@@ -110,6 +114,12 @@ impl From<GritFileSource> for DocumentFileSource {
     }
 }
 
+impl From<RFileSource> for DocumentFileSource {
+    fn from(value: RFileSource) -> Self {
+        Self::R(value)
+    }
+}
+
 impl From<&Path> for DocumentFileSource {
     fn from(path: &Path) -> Self {
         Self::from_path(path)
@@ -129,6 +139,9 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = RFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
@@ -164,6 +177,9 @@ impl DocumentFileSource {
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
+        if let Ok(file_source) = RFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
         Err(FileSourceError::UnknownExtension)
     }
 
@@ -193,6 +209,9 @@ impl DocumentFileSource {
         }
         #[cfg(feature = "experimental-grit")]
         if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = RFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownLanguageId)
@@ -338,6 +357,13 @@ impl DocumentFileSource {
         }
     }
 
+    pub fn to_r_file_source(&self) -> Option<RFileSource> {
+        match self {
+            DocumentFileSource::R(file_source) => Some(*file_source),
+            _ => None,
+        }
+    }
+
     pub fn can_parse(path: &Path, content: &str) -> bool {
         let file_source = DocumentFileSource::from(path);
         match file_source {
@@ -352,6 +378,7 @@ impl DocumentFileSource {
             | DocumentFileSource::Json(_) => true,
             DocumentFileSource::Html(_) => cfg!(feature = "experimental-html"),
             DocumentFileSource::Grit(_) => cfg!(feature = "experimental-grit"),
+            DocumentFileSource::R(_) => true,
             DocumentFileSource::Unknown => false,
         }
     }
@@ -385,6 +412,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
             DocumentFileSource::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
             DocumentFileSource::Html(_) => fmt.write_markup(markup! { "HTML" }),
             DocumentFileSource::Grit(_) => fmt.write_markup(markup! { "Grit" }),
+            DocumentFileSource::R(_) => fmt.write_markup(markup! { "R" }),
             DocumentFileSource::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -564,6 +592,7 @@ pub(crate) struct Features {
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
     grit: GritFileHandler,
+    r: RFileHandler,
 }
 
 impl Features {
@@ -578,6 +607,7 @@ impl Features {
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
             grit: GritFileHandler {},
+            r: RFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
@@ -600,6 +630,7 @@ impl Features {
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Html(_) => self.html.capabilities(),
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
+            DocumentFileSource::R(_) => self.r.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }
     }

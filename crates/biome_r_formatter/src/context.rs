@@ -64,7 +64,7 @@ impl CstFormatContext for RFormatContext {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct RFormatOptions {
     /// The indent style.
     indent_style: IndentStyle,
@@ -82,10 +82,7 @@ pub struct RFormatOptions {
 impl RFormatOptions {
     pub fn new() -> Self {
         Self {
-            indent_style: IndentStyle::default(),
-            indent_width: IndentWidth::default(),
-            line_ending: LineEnding::default(),
-            line_width: LineWidth::default(),
+            ..Default::default()
         }
     }
 

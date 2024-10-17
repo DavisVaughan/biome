@@ -1070,14 +1070,29 @@ dependencies = [
 [[package]]
 name = "biome_r_factory"
 version = "0.1.0"
+dependencies = [
+ "biome_r_syntax",
+ "biome_rowan",
+]
 
 [[package]]
 name = "biome_r_formatter"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "biome_formatter",
+ "biome_formatter_test",
+ "biome_fs",
+ "biome_parser",
+ "biome_r_factory",
+ "biome_r_parser",
  "biome_r_syntax",
  "biome_rowan",
+ "biome_service",
+ "countme",
+ "iai",
+ "quickcheck",
+ "quickcheck_macros",
+ "tests_macros",
 ]
 
 [[package]]
@@ -1161,6 +1176,9 @@ dependencies = [
  "biome_json_syntax",
  "biome_parser",
  "biome_project",
+ "biome_r_formatter",
+ "biome_r_parser",
+ "biome_r_syntax",
  "biome_rowan",
  "biome_string_case",
  "biome_text_edit",

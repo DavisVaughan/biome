@@ -34,6 +34,9 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_project::{NodeJsProject, PackageJson};
+use biome_r_formatter::context::RFormatOptions;
+use biome_r_parser::RParserOptions;
+use biome_r_syntax::RLanguage;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use indexmap::IndexSet;
 use rustc_hash::FxHashMap;
@@ -567,6 +570,7 @@ pub struct LanguageListSettings {
     pub graphql: LanguageSettings<GraphqlLanguage>,
     pub html: LanguageSettings<HtmlLanguage>,
     pub grit: LanguageSettings<GritLanguage>,
+    pub r: LanguageSettings<RLanguage>,
 }
 
 impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
@@ -1032,6 +1036,19 @@ impl OverrideSettings {
         options
     }
 
+    pub fn to_override_r_format_options(
+        &self,
+        path: &Path,
+        mut options: RFormatOptions,
+    ) -> RFormatOptions {
+        for pattern in self.patterns.iter() {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                pattern.apply_overrides_to_r_format_options(&mut options);
+            }
+        }
+        options
+    }
+
     pub fn to_override_js_parser_options(
         &self,
         path: &Path,
@@ -1067,6 +1084,20 @@ impl OverrideSettings {
         for pattern in self.patterns.iter() {
             if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
                 pattern.apply_overrides_to_css_parser_options(&mut options);
+            }
+        }
+        options
+    }
+
+    /// It scans the current override rules and return the parser options that of the first override is matched
+    pub fn to_override_r_parser_options(
+        &self,
+        path: &Path,
+        mut options: RParserOptions,
+    ) -> RParserOptions {
+        for pattern in self.patterns.iter() {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                pattern.apply_overrides_to_r_parser_options(&mut options);
             }
         }
         options
@@ -1414,6 +1445,24 @@ impl OverrideSettingPattern {
         }
     }
 
+    fn apply_overrides_to_r_format_options(&self, options: &mut RFormatOptions) {
+        let r_formatter = &self.languages.r.formatter;
+        let formatter = &self.formatter;
+
+        if let Some(indent_style) = r_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+        if let Some(indent_width) = r_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width)
+        }
+        if let Some(line_ending) = r_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = r_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+    }
+
     fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
         if let Ok(readonly_cache) = self.cached_js_parser_options.read() {
             if let Some(cached_options) = readonly_cache.as_ref() {
@@ -1465,6 +1514,10 @@ impl OverrideSettingPattern {
             let options = *options;
             let _ = writeonly_cache.insert(options);
         }
+    }
+
+    fn apply_overrides_to_r_parser_options(&self, _options: &mut RParserOptions) {
+        // TODO(r): Anything to do here?
     }
 
     #[allow(dead_code)]
