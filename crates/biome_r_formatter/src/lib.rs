@@ -213,6 +213,16 @@ where
     }
 }
 
+/// Rule for formatting an bogus node.
+pub(crate) trait FormatBogusNodeRule<N>
+where
+    N: AstNode<Language = RLanguage>,
+{
+    fn fmt(&self, node: &N, f: &mut RFormatter) -> FormatResult<()> {
+        format_bogus_node(node.syntax()).fmt(f)
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct RFormatLanguage {
     options: RFormatOptions,
