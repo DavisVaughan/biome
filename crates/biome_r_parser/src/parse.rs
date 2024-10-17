@@ -98,21 +98,25 @@ impl<'src> RWalk<'src> {
                             let this_end = TextSize::try_from(node.end_byte()).unwrap();
                             let gap = &self.text[usize::from(last_end)..usize::from(this_start)];
 
-                            let trailing;
+                            let mut trailing = !before_first_token;
 
                             if gap.contains('\n') {
                                 // If the gap has a newline this is a leading comment
                                 trailing = false;
-                                self.parse.derive_trivia(gap, last_end, false);
+                                self.parse.derive_trivia(gap, last_end, before_first_token);
                             } else {
-                                // Otherwise we're just after a token and this is a trailing comment
-                                trailing = true;
-
-                                self.parse.trivia.push(Trivia::new(
-                                    TriviaPieceKind::Whitespace,
-                                    TextRange::new(last_end, this_start),
-                                    trailing,
-                                ));
+                                // Otherwise we're just after a token and this is a trailing comment,
+                                // unless we are at the beginning of the document, in which case
+                                // the whitespace and comment are leading.
+                                //
+                                // We also make sure we don't add an empty whitespace trivia.
+                                if this_start != last_end {
+                                    self.parse.trivia.push(Trivia::new(
+                                        TriviaPieceKind::Whitespace,
+                                        TextRange::new(last_end, this_start),
+                                        trailing,
+                                    ));
+                                }
                             }
 
                             // Comments are "single line" event if they are consecutive
@@ -121,6 +125,8 @@ impl<'src> RWalk<'src> {
                                 TextRange::new(this_start, this_end),
                                 trailing,
                             ));
+
+                            last_end = this_end;
                         }
 
                         NodeSyntaxKind::Leaf(kind) => {
@@ -426,6 +432,25 @@ mod tests {
         assert_eq!(
             trivia("1 # foo"),
             vec![ws(1, 2, Pos::Trailing), cmt(2, 7, Pos::Trailing)]
+        );
+    }
+
+    #[test]
+    fn test_parse_trivia_comment_beginning_of_document_test() {
+        assert_eq!(trivia("# foo\n1"), vec![cmt(0, 5, Pos::Leading), nl(5, 6)]);
+    }
+
+    #[test]
+    fn test_parse_trivia_comment_beginning_of_document_with_whitespace_test() {
+        assert_eq!(
+            trivia(" \n \n# foo"),
+            vec![
+                ws(0, 1, Pos::Leading),
+                nl(1, 2),
+                ws(2, 3, Pos::Leading),
+                nl(3, 4),
+                cmt(4, 9, Pos::Leading),
+            ]
         );
     }
 }
