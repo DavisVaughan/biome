@@ -1,7 +1,9 @@
 use biome_parser::event::Event;
 use biome_parser::prelude::ParseDiagnostic;
 use biome_parser::prelude::Trivia;
+use biome_parser::AnyParse;
 use biome_r_syntax::RSyntaxKind;
+use biome_rowan::NodeCache;
 use biome_rowan::TextRange;
 use biome_rowan::TextSize;
 use biome_rowan::TriviaPieceKind;
@@ -11,8 +13,30 @@ use tree_sitter::Tree;
 use crate::treesitter::NodeSyntaxKind;
 use crate::treesitter::NodeTypeExt;
 use crate::treesitter::WalkEvent;
+use crate::RLosslessTreeSink;
+use crate::RParserOptions;
 
-pub fn parse(text: &str) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiagnostic>) {
+// TODO(r): These should really return an intermediate `Parse` type which
+// can `.into()` an `AnyParse`, see `biome_js_parser`'s `Parse` type
+pub fn parse(text: &str, options: RParserOptions) -> AnyParse {
+    let mut cache = NodeCache::default();
+    parse_r_with_cache(text, options, &mut cache)
+}
+
+pub fn parse_r_with_cache(text: &str, options: RParserOptions, cache: &mut NodeCache) -> AnyParse {
+    tracing::debug_span!("parse").in_scope(move || {
+        let (events, tokens, errors) = parse_text(text, options);
+        let mut tree_sink = RLosslessTreeSink::with_cache(text, &tokens, cache);
+        biome_parser::event::process(&mut tree_sink, events, errors);
+        let (green, parse_errors) = tree_sink.finish();
+        AnyParse::new(green.as_send().unwrap(), parse_errors)
+    })
+}
+
+pub fn parse_text(
+    text: &str,
+    _options: RParserOptions,
+) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiagnostic>) {
     let mut parser = tree_sitter::Parser::new();
     parser
         .set_language(&tree_sitter_r::LANGUAGE.into())
@@ -316,7 +340,7 @@ mod tests {
     }
 
     fn trivia(text: &str) -> Vec<Trivia> {
-        let (_events, trivia, _errors) = parse(text);
+        let (_events, trivia, _errors) = parse_text(text, RParserOptions::default());
         trivia
     }
 
@@ -346,7 +370,7 @@ mod tests {
 
     #[test]
     fn test_parse_smoke_test() {
-        let (events, trivia, _errors) = parse("1+1");
+        let (events, trivia, _errors) = parse_text("1+1", RParserOptions::default());
 
         let expect = vec![
             Event::Start {
