@@ -226,11 +226,26 @@ impl RParse {
         // Now push all leading trivia
         let trailing = false;
 
-        let mut in_whitespace = false;
         let mut in_crlf = false;
 
         while let Some(byte) = iter.next() {
             end += TextSize::from(1);
+
+            if Self::is_whitespace(*byte) {
+                while let Some(byte) = iter.peek() {
+                    if Self::is_whitespace(**byte) {
+                        let _ = iter.next();
+                        end += TextSize::from(1);
+                    } else {
+                        break;
+                    }
+                }
+
+                let range = TextRange::new(start, end);
+                self.push_trivia(Trivia::new(TriviaPieceKind::Whitespace, range, trailing));
+                start = end;
+                continue;
+            }
 
             if in_crlf {
                 in_crlf = false;
@@ -247,24 +262,6 @@ impl RParse {
                     self.push_trivia(Trivia::new(TriviaPieceKind::Newline, range, trailing));
                     start = start + TextSize::from(1);
                 }
-            }
-
-            if in_whitespace {
-                if Self::is_whitespace(*byte) {
-                    // Continue stream of whitespace
-                    continue;
-                } else {
-                    // Finish out stream of whitespace, then let `byte` fall through
-                    in_whitespace = false;
-                    let range = TextRange::new(start, end - TextSize::from(1));
-                    self.push_trivia(Trivia::new(TriviaPieceKind::Whitespace, range, trailing));
-                    start = end - TextSize::from(1);
-                }
-            }
-
-            if Self::is_whitespace(*byte) {
-                in_whitespace = true;
-                continue;
             }
 
             if let b'\r' = byte {
@@ -287,12 +284,6 @@ impl RParse {
             // Finish out `\r` if it was the last character
             let range = TextRange::new(start, end);
             self.push_trivia(Trivia::new(TriviaPieceKind::Newline, range, trailing));
-        }
-
-        if in_whitespace {
-            // Finish out stream of whitespace if nothing came after it
-            let range = TextRange::new(start, end);
-            self.push_trivia(Trivia::new(TriviaPieceKind::Whitespace, range, trailing));
         }
     }
 
