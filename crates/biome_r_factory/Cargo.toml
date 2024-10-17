@@ -10,6 +10,8 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+biome_r_syntax    = { workspace = true }
+biome_rowan       = { workspace = true }
 
 [lints]
 workspace = true
