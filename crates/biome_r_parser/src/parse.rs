@@ -108,7 +108,15 @@ impl<'src> RWalk<'src> {
                             // We handle leaves on `Leave`
                             ()
                         }
-                        NodeSyntaxKind::Node(kind) => self.parse.start(kind),
+                        NodeSyntaxKind::Node(kind) => {
+                            self.parse.start(kind);
+                            if kind == RSyntaxKind::R_ROOT {
+                                self.parse.push_event(Event::Start {
+                                    kind: RSyntaxKind::R_EXPRESSION_LIST,
+                                    forward_parent: None,
+                                });
+                            }
+                        }
                     }
                 }
                 WalkEvent::Leave(node) => {
@@ -167,7 +175,13 @@ impl<'src> RWalk<'src> {
                             before_first_token = false;
                         }
 
-                        NodeSyntaxKind::Node(_) => self.parse.finish(),
+                        NodeSyntaxKind::Node(kind) => {
+                            if kind == RSyntaxKind::R_ROOT {
+                                // Finish expression list
+                                self.parse.finish();
+                            }
+                            self.parse.finish();
+                        }
                     }
                 }
             }
@@ -378,6 +392,10 @@ mod tests {
                 forward_parent: None,
             },
             Event::Start {
+                kind: RSyntaxKind::R_EXPRESSION_LIST,
+                forward_parent: None,
+            },
+            Event::Start {
                 kind: RSyntaxKind::R_BINARY_EXPRESSION,
                 forward_parent: None,
             },
@@ -393,6 +411,7 @@ mod tests {
                 kind: RSyntaxKind::R_DOUBLE_VALUE,
                 end: TextSize::from(3),
             },
+            Event::Finish,
             Event::Finish,
             Event::Finish,
         ];
