@@ -91,7 +91,9 @@ impl<'src> RWalk<'src> {
 
     fn walk(&mut self) {
         let mut last_end = TextSize::from(0);
-        let mut before_first_token = true;
+
+        // We are currently between the start of file and the first token
+        let mut between_two_tokens = false;
 
         let root = self.ast.root_node();
         let mut iter = root.preorder();
@@ -130,12 +132,12 @@ impl<'src> RWalk<'src> {
                             let this_end = TextSize::try_from(node.end_byte()).unwrap();
                             let gap = &self.text[usize::from(last_end)..usize::from(this_start)];
 
-                            let mut trailing = !before_first_token;
+                            let mut trailing = between_two_tokens;
 
                             if gap.contains('\n') {
                                 // If the gap has a newline this is a leading comment
                                 trailing = false;
-                                self.parse.derive_trivia(gap, last_end, before_first_token);
+                                self.parse.derive_trivia(gap, last_end, between_two_tokens);
                             } else {
                                 // Otherwise we're just after a token and this is a trailing comment,
                                 // unless we are at the beginning of the document, in which case
@@ -172,11 +174,11 @@ impl<'src> RWalk<'src> {
                             // start.
                             let gap = &self.text[usize::from(last_end)..usize::from(this_start)];
 
-                            self.parse.derive_trivia(gap, last_end, before_first_token);
+                            self.parse.derive_trivia(gap, last_end, between_two_tokens);
                             self.parse.token(kind, this_end);
 
                             last_end = this_end;
-                            before_first_token = false;
+                            between_two_tokens = true;
                         }
 
                         NodeSyntaxKind::Value(_, kind) => {
@@ -190,7 +192,7 @@ impl<'src> RWalk<'src> {
                             // start.
                             let gap = &self.text[usize::from(last_end)..usize::from(this_start)];
 
-                            self.parse.derive_trivia(gap, last_end, before_first_token);
+                            self.parse.derive_trivia(gap, last_end, between_two_tokens);
 
                             // Push the token
                             self.parse.token(kind, this_end);
@@ -199,7 +201,7 @@ impl<'src> RWalk<'src> {
                             self.parse.finish();
 
                             last_end = this_end;
-                            before_first_token = false;
+                            between_two_tokens = true;
                         }
 
                         NodeSyntaxKind::Node(kind) => {
@@ -207,6 +209,10 @@ impl<'src> RWalk<'src> {
                                 RSyntaxKind::R_ROOT => {
                                     // Finish expression list
                                     self.parse.finish();
+
+                                    // No longer between two tokens.
+                                    // Now between last token and EOF.
+                                    between_two_tokens = false;
 
                                     // TODO!: Don't unwrap()
                                     let this_end = TextSize::try_from(node.end_byte()).unwrap();
@@ -216,7 +222,7 @@ impl<'src> RWalk<'src> {
                                     // Derive trivia between last token and end of document.
                                     // It is always leading trivia of the `EOF` token,
                                     // which `TreeSink` adds for us.
-                                    self.parse.derive_trivia(gap, last_end, true);
+                                    self.parse.derive_trivia(gap, last_end, between_two_tokens);
 
                                     // Finish node
                                     self.parse.finish();
@@ -291,14 +297,17 @@ impl RParse {
     ///
     /// SAFETY: `last_end <= next_start`
     /// SAFETY: `last_end` and `next_start` must define a range within `text`
-    fn derive_trivia(&mut self, text: &str, mut start: TextSize, only_leading: bool) {
+    fn derive_trivia(&mut self, text: &str, mut start: TextSize, between_two_tokens: bool) {
         let mut iter = text.as_bytes().iter().peekable();
         let mut end = start;
 
-        // First detect trailing trivia for the last token. Can't have trailing
-        // trivia before the first token, so if that's the case then all trivia
-        // is leading trivia and we skip this step.
-        if !only_leading {
+        // - Between the start of file and the first token, all trivia is leading
+        //   (it leads the first token), so we skip this.
+        // - Between the last token and the end of file, all trivia is leading
+        //   (it leads the EOF token that `TreeSink` adds), so we skip this.
+        // - Between two tokens, all trivia is leading unless we see a newline,
+        //   which this branch handles specially.
+        if between_two_tokens {
             let mut trailing = false;
 
             // All whitespace between two tokens is leading until we hit the
