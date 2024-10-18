@@ -18,10 +18,17 @@ impl FormatNodeRule<RBinaryExpression> for FormatRBinaryExpression {
             f,
             [group(&format_args![
                 left.format(),
-                space(),
-                operator_token_token.format(),
-                soft_line_break_or_space(),
-                right.format()
+                indent(&format_once(|f| {
+                    write!(
+                        f,
+                        [
+                            space(),
+                            operator_token_token.format(),
+                            soft_line_break_or_space(),
+                            right.format()
+                        ]
+                    )
+                }))
             ])]
         )
     }

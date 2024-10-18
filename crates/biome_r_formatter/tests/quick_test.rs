@@ -1,3 +1,5 @@
+use biome_formatter::IndentStyle;
+use biome_formatter::LineWidth;
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_r_formatter::context::RFormatOptions;
 use biome_r_formatter::format_node;
@@ -17,7 +19,9 @@ fn quick_test() {
 
     let parse = parse(src, RParserOptions::default());
 
-    let options = RFormatOptions::default();
+    let options = RFormatOptions::default()
+        .with_indent_style(IndentStyle::Space)
+        .with_line_width(LineWidth::try_from(80).unwrap());
 
     let formatted = format_node(options.clone(), &parse.syntax()).unwrap();
     let result = formatted.print().unwrap();
@@ -26,7 +30,7 @@ fn quick_test() {
     println!("{}", formatted.into_document());
     println!();
     println!("---- Code ----");
-    println!("'{}'", result.as_code());
+    println!("start\n{}\nend", result.as_code());
 
     let root = &parse.syntax();
     let language = language::RTestFormatLanguage::default();
