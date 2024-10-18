@@ -8,15 +8,11 @@ impl FormatRule<AnyRExpression> for FormatAnyRExpression {
     type Context = RFormatContext;
     fn fmt(&self, node: &AnyRExpression, f: &mut RFormatter) -> FormatResult<()> {
         match node {
+            AnyRExpression::AnyRValue(node) => node.format().fmt(f),
             AnyRExpression::RBinaryExpression(node) => node.format().fmt(f),
-            AnyRExpression::RBogusValue(node) => node.format().fmt(f),
-            AnyRExpression::RDoubleValue(node) => node.format().fmt(f),
+            AnyRExpression::RBogusExpression(node) => node.format().fmt(f),
             AnyRExpression::RFunctionDefinition(node) => node.format().fmt(f),
             AnyRExpression::RIdentifier(node) => node.format().fmt(f),
-            AnyRExpression::RIntegerValue(node) => node.format().fmt(f),
-            AnyRExpression::RLogicalValue(node) => node.format().fmt(f),
-            AnyRExpression::RNullValue(node) => node.format().fmt(f),
-            AnyRExpression::RStringValue(node) => node.format().fmt(f),
         }
     }
 }

@@ -29,24 +29,100 @@ impl biome_rowan::SyntaxKind for RSyntaxKind {
     const EOF: Self = RSyntaxKind::EOF;
 
     fn is_bogus(&self) -> bool {
-        matches!(
-            self,
-            RSyntaxKind::R_BOGUS | RSyntaxKind::R_BOGUS_VALUE | RSyntaxKind::R_BOGUS_PARAMETER
-        )
-    }
-
-    fn to_bogus(&self) -> Self {
         match self {
-            RSyntaxKind::R_INTEGER_VALUE
+            RSyntaxKind::R_BOGUS
+            | RSyntaxKind::R_BOGUS_VALUE
+            | RSyntaxKind::R_BOGUS_EXPRESSION
+            | RSyntaxKind::R_BOGUS_PARAMETER => true,
+
+            RSyntaxKind::TOMBSTONE
+            | RSyntaxKind::EOF
+            | RSyntaxKind::UNICODE_BOM
+            | RSyntaxKind::SEMICOLON
+            | RSyntaxKind::COMMA
+            | RSyntaxKind::L_CURLY
+            | RSyntaxKind::R_CURLY
+            | RSyntaxKind::L_BRACK
+            | RSyntaxKind::R_BRACK
+            | RSyntaxKind::L_PAREN
+            | RSyntaxKind::R_PAREN
+            | RSyntaxKind::PLUS
+            | RSyntaxKind::FUNCTION_KW
+            | RSyntaxKind::R_INTEGER_LITERAL
+            | RSyntaxKind::R_DOUBLE_LITERAL
+            | RSyntaxKind::R_STRING_LITERAL
+            | RSyntaxKind::R_LOGICAL_LITERAL
+            | RSyntaxKind::R_NULL_LITERAL
+            | RSyntaxKind::NEWLINE
+            | RSyntaxKind::WHITESPACE
+            | RSyntaxKind::IDENT
+            | RSyntaxKind::COMMENT
+            | RSyntaxKind::R_ROOT
+            | RSyntaxKind::R_IDENTIFIER
+            | RSyntaxKind::R_BINARY_EXPRESSION
+            | RSyntaxKind::R_FUNCTION_DEFINITION
+            | RSyntaxKind::R_PARAMETERS
+            | RSyntaxKind::R_PARAMETER_LIST
+            | RSyntaxKind::R_PARAMETER
+            | RSyntaxKind::R_EXPRESSION_LIST
+            | RSyntaxKind::R_INTEGER_VALUE
             | RSyntaxKind::R_DOUBLE_VALUE
             | RSyntaxKind::R_STRING_VALUE
             | RSyntaxKind::R_LOGICAL_VALUE
             | RSyntaxKind::R_NULL_VALUE
-            | RSyntaxKind::R_BOGUS_VALUE => RSyntaxKind::R_BOGUS_VALUE,
-            RSyntaxKind::R_PARAMETER | RSyntaxKind::R_BOGUS_PARAMETER => {
-                RSyntaxKind::R_BOGUS_PARAMETER
-            }
-            _ => RSyntaxKind::R_BOGUS,
+            | RSyntaxKind::__LAST => false,
+        }
+    }
+
+    fn to_bogus(&self) -> Self {
+        match self {
+            // Bogus value
+            RSyntaxKind::R_INTEGER_VALUE => RSyntaxKind::R_BOGUS_VALUE,
+            RSyntaxKind::R_DOUBLE_VALUE => RSyntaxKind::R_BOGUS_VALUE,
+            RSyntaxKind::R_STRING_VALUE => RSyntaxKind::R_BOGUS_VALUE,
+            RSyntaxKind::R_LOGICAL_VALUE => RSyntaxKind::R_BOGUS_VALUE,
+            RSyntaxKind::R_NULL_VALUE => RSyntaxKind::R_BOGUS_VALUE,
+            RSyntaxKind::R_BOGUS_VALUE => RSyntaxKind::R_BOGUS_VALUE,
+
+            // Bogus parameter
+            RSyntaxKind::R_PARAMETER => RSyntaxKind::R_BOGUS_PARAMETER,
+            RSyntaxKind::R_BOGUS_PARAMETER => RSyntaxKind::R_BOGUS_PARAMETER,
+
+            // Bogus expression
+            RSyntaxKind::R_BINARY_EXPRESSION => RSyntaxKind::R_BOGUS_EXPRESSION,
+            RSyntaxKind::R_BOGUS_EXPRESSION => RSyntaxKind::R_BOGUS_EXPRESSION,
+
+            // Bogus
+            RSyntaxKind::TOMBSTONE => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::EOF => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::UNICODE_BOM => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::SEMICOLON => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::COMMA => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::L_CURLY => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_CURLY => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::L_BRACK => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_BRACK => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::L_PAREN => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_PAREN => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::PLUS => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::FUNCTION_KW => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_INTEGER_LITERAL => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_DOUBLE_LITERAL => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_STRING_LITERAL => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_LOGICAL_LITERAL => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_NULL_LITERAL => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::NEWLINE => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::WHITESPACE => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::IDENT => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::COMMENT => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_ROOT => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_IDENTIFIER => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_FUNCTION_DEFINITION => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_PARAMETERS => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_PARAMETER_LIST => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_EXPRESSION_LIST => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::__LAST => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::R_BOGUS => RSyntaxKind::R_BOGUS,
         }
     }
 

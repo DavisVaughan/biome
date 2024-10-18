@@ -24,26 +24,39 @@
 // - Bogus nodes are special nodes used to keep track of broken code; they are
 //   not part of the grammar but they will appear inside the green tree
 
+// ----------------------------------------------------------------
+// Initial
+
 SyntaxElement = SyntaxElement
+
+// ----------------------------------------------------------------
+// Bogus
 
 RBogus = SyntaxElement*
 RBogusValue = SyntaxElement*
+RBogusExpression = SyntaxElement*
 RBogusParameter = SyntaxElement*
+
+// ----------------------------------------------------------------
+// Root
 
 RRoot =
 	bom: 'UNICODE_BOM'?
 	expressions: RExpressionList
 	eof: 'EOF'
 
-RIdentifier =
-	name: 'ident'
+// ----------------------------------------------------------------
+// Binary
 
 RBinaryExpression =
-    left: AnyRExpression
+	left: AnyRExpression
     operator_token: (
-    	'+'
+		'+'
 	)
-    right: AnyRExpression
+	right: AnyRExpression
+
+// ----------------------------------------------------------------
+// Function
 
 // TODO: `\\` is not a valid Ident and causes issues with codegen
 RFunctionDefinition =
@@ -65,21 +78,36 @@ AnyRParameter =
 // TODO: Default values
 RParameter = RIdentifier
 
+// ----------------------------------------------------------------
+// Expression
+
 RExpressionList = AnyRExpression*
 
 AnyRExpression =
-	RIdentifier
+	AnyRValue
+	| RIdentifier
 	| RBinaryExpression
 	| RFunctionDefinition
-	| RStringValue
-	| RIntegerValue
+	| RBogusExpression
+
+// ----------------------------------------------------------------
+// Value
+
+AnyRValue =
+	RIntegerValue
 	| RDoubleValue
+	| RStringValue
 	| RLogicalValue
 	| RNullValue
 	| RBogusValue
 
-RIntegerValue = value: 'r_integer_value'
-RDoubleValue = value: 'r_double_value'
-RStringValue = value: 'r_string_value'
-RLogicalValue = value: 'r_logical_value'
-RNullValue = value: 'r_null_value'
+RIntegerValue = value: 'r_integer_literal'
+RDoubleValue = value: 'r_double_literal'
+RStringValue = value: 'r_string_literal'
+RLogicalValue = value: 'r_logical_literal'
+RNullValue = value: 'r_null_literal'
+
+// ----------------------------------------------------------------
+// Identifier
+
+RIdentifier = name: 'ident'

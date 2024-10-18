@@ -14,7 +14,7 @@ impl SyntaxFactory for RSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            R_BOGUS | R_BOGUS_PARAMETER | R_BOGUS_VALUE => {
+            R_BOGUS | R_BOGUS_EXPRESSION | R_BOGUS_PARAMETER | R_BOGUS_VALUE => {
                 RawSyntaxNode::new(kind, children.into_iter().map(Some))
             }
             R_BINARY_EXPRESSION => {
@@ -55,7 +55,7 @@ impl SyntaxFactory for RSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == R_DOUBLE_VALUE {
+                    if element.kind() == R_DOUBLE_LITERAL {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -126,7 +126,7 @@ impl SyntaxFactory for RSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == R_INTEGER_VALUE {
+                    if element.kind() == R_INTEGER_LITERAL {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -145,7 +145,7 @@ impl SyntaxFactory for RSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == R_LOGICAL_VALUE {
+                    if element.kind() == R_LOGICAL_LITERAL {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -164,7 +164,7 @@ impl SyntaxFactory for RSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == R_NULL_VALUE {
+                    if element.kind() == R_NULL_LITERAL {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -265,7 +265,7 @@ impl SyntaxFactory for RSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == R_STRING_VALUE {
+                    if element.kind() == R_STRING_LITERAL {
                         slots.mark_present();
                         current_element = elements.next();
                     }

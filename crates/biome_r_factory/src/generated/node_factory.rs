@@ -158,6 +158,16 @@ where
 {
     RBogus::unwrap_cast(SyntaxNode::new_detached(RSyntaxKind::R_BOGUS, slots))
 }
+pub fn r_bogus_expression<I>(slots: I) -> RBogusExpression
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    RBogusExpression::unwrap_cast(SyntaxNode::new_detached(
+        RSyntaxKind::R_BOGUS_EXPRESSION,
+        slots,
+    ))
+}
 pub fn r_bogus_parameter<I>(slots: I) -> RBogusParameter
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,

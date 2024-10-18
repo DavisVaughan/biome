@@ -23,11 +23,11 @@ pub enum RSyntaxKind {
     R_PAREN,
     PLUS,
     FUNCTION_KW,
-    R_INTEGER_VALUE,
-    R_DOUBLE_VALUE,
-    R_STRING_VALUE,
-    R_LOGICAL_VALUE,
-    R_NULL_VALUE,
+    R_INTEGER_LITERAL,
+    R_DOUBLE_LITERAL,
+    R_STRING_LITERAL,
+    R_LOGICAL_LITERAL,
+    R_NULL_LITERAL,
     NEWLINE,
     WHITESPACE,
     IDENT,
@@ -40,8 +40,14 @@ pub enum RSyntaxKind {
     R_PARAMETER_LIST,
     R_PARAMETER,
     R_EXPRESSION_LIST,
+    R_INTEGER_VALUE,
+    R_DOUBLE_VALUE,
+    R_STRING_VALUE,
+    R_LOGICAL_VALUE,
+    R_NULL_VALUE,
     R_BOGUS,
     R_BOGUS_VALUE,
+    R_BOGUS_EXPRESSION,
     R_BOGUS_PARAMETER,
     #[doc(hidden)]
     __LAST,
@@ -57,9 +63,8 @@ impl RSyntaxKind {
     }
     pub const fn is_literal(self) -> bool {
         match self {
-            R_INTEGER_VALUE | R_DOUBLE_VALUE | R_STRING_VALUE | R_LOGICAL_VALUE | R_NULL_VALUE => {
-                true
-            }
+            R_INTEGER_LITERAL | R_DOUBLE_LITERAL | R_STRING_LITERAL | R_LOGICAL_LITERAL
+            | R_NULL_LITERAL => true,
             _ => false,
         }
     }

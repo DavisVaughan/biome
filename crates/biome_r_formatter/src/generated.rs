@@ -467,6 +467,42 @@ impl IntoFormat<RFormatContext> for biome_r_syntax::RBogus {
         FormatOwnedWithRule::new(self, crate::r::bogus::bogus::FormatRBogus::default())
     }
 }
+impl FormatRule<biome_r_syntax::RBogusExpression>
+    for crate::r::bogus::bogus_expression::FormatRBogusExpression
+{
+    type Context = RFormatContext;
+    #[inline(always)]
+    fn fmt(&self, node: &biome_r_syntax::RBogusExpression, f: &mut RFormatter) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_r_syntax::RBogusExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<RFormatContext> for biome_r_syntax::RBogusExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_r_syntax::RBogusExpression,
+        crate::r::bogus::bogus_expression::FormatRBogusExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::r::bogus::bogus_expression::FormatRBogusExpression::default(),
+        )
+    }
+}
+impl IntoFormat<RFormatContext> for biome_r_syntax::RBogusExpression {
+    type Format = FormatOwnedWithRule<
+        biome_r_syntax::RBogusExpression,
+        crate::r::bogus::bogus_expression::FormatRBogusExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::r::bogus::bogus_expression::FormatRBogusExpression::default(),
+        )
+    }
+}
 impl FormatRule<biome_r_syntax::RBogusParameter>
     for crate::r::bogus::bogus_parameter::FormatRBogusParameter
 {
@@ -589,5 +625,21 @@ impl IntoFormat<RFormatContext> for biome_r_syntax::AnyRParameter {
             self,
             crate::r::any::parameter::FormatAnyRParameter::default(),
         )
+    }
+}
+impl AsFormat<RFormatContext> for biome_r_syntax::AnyRValue {
+    type Format<'a> =
+        FormatRefWithRule<'a, biome_r_syntax::AnyRValue, crate::r::any::value::FormatAnyRValue>;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(self, crate::r::any::value::FormatAnyRValue::default())
+    }
+}
+impl IntoFormat<RFormatContext> for biome_r_syntax::AnyRValue {
+    type Format =
+        FormatOwnedWithRule<biome_r_syntax::AnyRValue, crate::r::any::value::FormatAnyRValue>;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(self, crate::r::any::value::FormatAnyRValue::default())
     }
 }

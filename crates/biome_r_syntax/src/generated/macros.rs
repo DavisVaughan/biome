@@ -64,6 +64,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::RBogus::new_unchecked(node) };
                     $body
                 }
+                $crate::RSyntaxKind::R_BOGUS_EXPRESSION => {
+                    let $pattern = unsafe { $crate::RBogusExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::RSyntaxKind::R_BOGUS_PARAMETER => {
                     let $pattern = unsafe { $crate::RBogusParameter::new_unchecked(node) };
                     $body
