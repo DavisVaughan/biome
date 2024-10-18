@@ -3,10 +3,14 @@ use biome_formatter::prelude::*;
 use biome_formatter::write;
 use biome_formatter::CstFormatContext;
 use biome_formatter::FormatLanguage;
+use biome_formatter::FormatOwnedWithRule;
+use biome_formatter::FormatRefWithRule;
+use biome_formatter::FormatToken;
 use biome_formatter::Formatted;
 use biome_formatter::TransformSourceMap;
 use biome_r_syntax::RLanguage;
 use biome_r_syntax::RSyntaxNode;
+use biome_r_syntax::RSyntaxToken;
 use biome_rowan::AstNode;
 
 use crate::comments::RCommentStyle;
@@ -224,6 +228,25 @@ where
 {
     fn fmt(&self, node: &N, f: &mut RFormatter) -> FormatResult<()> {
         format_bogus_node(node.syntax()).fmt(f)
+    }
+}
+
+/// Format implementation specific to R tokens.
+pub(crate) type FormatRSyntaxToken = FormatToken<RFormatContext>;
+
+impl AsFormat<RFormatContext> for RSyntaxToken {
+    type Format<'a> = FormatRefWithRule<'a, RSyntaxToken, FormatRSyntaxToken>;
+
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(self, FormatRSyntaxToken::default())
+    }
+}
+
+impl IntoFormat<RFormatContext> for RSyntaxToken {
+    type Format = FormatOwnedWithRule<RSyntaxToken, FormatRSyntaxToken>;
+
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(self, FormatRSyntaxToken::default())
     }
 }
 
