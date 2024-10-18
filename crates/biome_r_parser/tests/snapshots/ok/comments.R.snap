@@ -28,7 +28,7 @@ RRoot {
             },
         },
     ],
-    eof_token: EOF@26..37 "\n" [Newline("\n"), Comments("# Leading")] [],
+    eof_token: EOF@26..37 "" [Newline("\n"), Comments("# Leading"), Newline("\n")] [],
 }
 ```
 
@@ -44,6 +44,6 @@ RRoot {
       1: PLUS@11..13 "+" [Whitespace(" ")] []
       2: R_DOUBLE_VALUE@13..26
         0: R_DOUBLE_LITERAL@13..26 "1" [Whitespace(" ")] [Whitespace(" "), Comments("# Trailing")]
-  2: EOF@26..37 "\n" [Newline("\n"), Comments("# Leading")] []
+  2: EOF@26..37 "" [Newline("\n"), Comments("# Leading"), Newline("\n")] []
 
 ```

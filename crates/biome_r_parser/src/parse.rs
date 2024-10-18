@@ -203,11 +203,29 @@ impl<'src> RWalk<'src> {
                         }
 
                         NodeSyntaxKind::Node(kind) => {
-                            if kind == RSyntaxKind::R_ROOT {
-                                // Finish expression list
-                                self.parse.finish();
+                            match kind {
+                                RSyntaxKind::R_ROOT => {
+                                    // Finish expression list
+                                    self.parse.finish();
+
+                                    // TODO!: Don't unwrap()
+                                    let this_end = TextSize::try_from(node.end_byte()).unwrap();
+                                    let gap =
+                                        &self.text[usize::from(last_end)..usize::from(this_end)];
+
+                                    // Derive trivia between last token and end of document.
+                                    // It is always leading trivia of the `EOF` token,
+                                    // which `TreeSink` adds for us.
+                                    self.parse.derive_trivia(gap, last_end, true);
+
+                                    // Finish node
+                                    self.parse.finish();
+                                }
+                                _ => {
+                                    // Finish node
+                                    self.parse.finish();
+                                }
                             }
-                            self.parse.finish();
                         }
                     }
                 }
@@ -483,6 +501,16 @@ mod tests {
         assert_eq!(
             trivia("1 + \n1"),
             vec![ws(1, 2, Pos::Leading), ws(3, 4, Pos::Trailing), nl(4, 5)]
+        );
+    }
+
+    #[test]
+    fn test_parse_trivia_trailing_trivia_test() {
+        // Note that trivia between the last token and `EOF` is always
+        // leading and will be attached to an `EOF` token by `TreeSink`.
+        assert_eq!(
+            trivia("1  \n "),
+            vec![ws(1, 3, Pos::Leading), nl(3, 4), ws(4, 5, Pos::Leading)]
         );
     }
 
