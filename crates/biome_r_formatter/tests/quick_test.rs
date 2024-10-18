@@ -13,15 +13,20 @@ mod language {
 #[ignore]
 #[test]
 fn quick_test() {
-    let src = r#"1 + 1"#;
+    let src = "1 + 1\n";
 
     let parse = parse(src, RParserOptions::default());
 
     let options = RFormatOptions::default();
-    let result = format_node(options.clone(), &parse.syntax())
-        .unwrap()
-        .print()
-        .unwrap();
+
+    let formatted = format_node(options.clone(), &parse.syntax()).unwrap();
+    let result = formatted.print().unwrap();
+
+    println!("---- IR Representation ----");
+    println!("{}", formatted.into_document());
+    println!();
+    println!("---- Code ----");
+    println!("'{}'", result.as_code());
 
     let root = &parse.syntax();
     let language = language::RTestFormatLanguage::default();
@@ -35,6 +40,4 @@ fn quick_test() {
         RFormatLanguage::new(options),
     );
     check_reformat.check_reformat();
-
-    assert_eq!(result.as_code(), r#"1 + 1"#);
 }
