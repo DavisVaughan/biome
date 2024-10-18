@@ -39,14 +39,14 @@ impl RBinaryExpression {
     pub fn as_fields(&self) -> RBinaryExpressionFields {
         RBinaryExpressionFields {
             left: self.left(),
-            operator_token: self.operator_token(),
+            operator_token_token: self.operator_token_token(),
             right: self.right(),
         }
     }
     pub fn left(&self) -> SyntaxResult<AnyRExpression> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn operator_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn operator_token_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
     pub fn right(&self) -> SyntaxResult<AnyRExpression> {
@@ -64,7 +64,7 @@ impl Serialize for RBinaryExpression {
 #[derive(Serialize)]
 pub struct RBinaryExpressionFields {
     pub left: SyntaxResult<AnyRExpression>,
-    pub operator_token: SyntaxResult<SyntaxToken>,
+    pub operator_token_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyRExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -560,8 +560,8 @@ impl std::fmt::Debug for RBinaryExpression {
         f.debug_struct("RBinaryExpression")
             .field("left", &support::DebugSyntaxResult(self.left()))
             .field(
-                "operator_token",
-                &support::DebugSyntaxResult(self.operator_token()),
+                "operator_token_token",
+                &support::DebugSyntaxResult(self.operator_token_token()),
             )
             .field("right", &support::DebugSyntaxResult(self.right()))
             .finish()
