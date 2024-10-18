@@ -354,8 +354,13 @@ impl<'tree> Iterator for Preorder<'tree> {
 }
 
 pub enum NodeSyntaxKind {
-    Leaf(RSyntaxKind),
+    /// An individual token
+    Token(RSyntaxKind),
+    /// A node that has children
     Node(RSyntaxKind),
+    /// A token/node hybrid. For example, `1` is the node `R_DOUBLE_VALUE`,
+    /// but it also knows it holds the token `R_DOUBLE_TOKEN`.
+    Value(RSyntaxKind, RSyntaxKind),
     Comment,
 }
 
@@ -366,18 +371,30 @@ fn node_syntax_kind(x: &Node) -> NodeSyntaxKind {
         "binary_operator" => NodeSyntaxKind::Node(RSyntaxKind::R_BINARY_EXPRESSION),
         "function_definition" => NodeSyntaxKind::Node(RSyntaxKind::R_FUNCTION_DEFINITION),
 
-        // Leaves
-        "integer" => NodeSyntaxKind::Leaf(RSyntaxKind::R_INTEGER_VALUE),
-        "float" => NodeSyntaxKind::Leaf(RSyntaxKind::R_DOUBLE_VALUE),
-        "string" => NodeSyntaxKind::Leaf(RSyntaxKind::R_STRING_VALUE),
-        "true" => NodeSyntaxKind::Leaf(RSyntaxKind::R_LOGICAL_VALUE),
-        "false" => NodeSyntaxKind::Leaf(RSyntaxKind::R_LOGICAL_VALUE),
-        "null" => NodeSyntaxKind::Leaf(RSyntaxKind::R_NULL_VALUE),
-        "{" => NodeSyntaxKind::Leaf(RSyntaxKind::L_CURLY),
-        "}" => NodeSyntaxKind::Leaf(RSyntaxKind::R_CURLY),
-        "[" => NodeSyntaxKind::Leaf(RSyntaxKind::L_BRACK),
-        "]" => NodeSyntaxKind::Leaf(RSyntaxKind::R_BRACK),
-        "+" => NodeSyntaxKind::Leaf(RSyntaxKind::PLUS),
+        // Values
+        "integer" => {
+            NodeSyntaxKind::Value(RSyntaxKind::R_INTEGER_VALUE, RSyntaxKind::R_INTEGER_LITERAL)
+        }
+        "float" => {
+            NodeSyntaxKind::Value(RSyntaxKind::R_DOUBLE_VALUE, RSyntaxKind::R_DOUBLE_LITERAL)
+        }
+        "string" => {
+            NodeSyntaxKind::Value(RSyntaxKind::R_STRING_VALUE, RSyntaxKind::R_STRING_LITERAL)
+        }
+        "true" => {
+            NodeSyntaxKind::Value(RSyntaxKind::R_LOGICAL_VALUE, RSyntaxKind::R_LOGICAL_LITERAL)
+        }
+        "false" => {
+            NodeSyntaxKind::Value(RSyntaxKind::R_LOGICAL_VALUE, RSyntaxKind::R_LOGICAL_LITERAL)
+        }
+        "null" => NodeSyntaxKind::Value(RSyntaxKind::R_NULL_VALUE, RSyntaxKind::R_NULL_LITERAL),
+
+        // Tokens
+        "{" => NodeSyntaxKind::Token(RSyntaxKind::L_CURLY),
+        "}" => NodeSyntaxKind::Token(RSyntaxKind::R_CURLY),
+        "[" => NodeSyntaxKind::Token(RSyntaxKind::L_BRACK),
+        "]" => NodeSyntaxKind::Token(RSyntaxKind::R_BRACK),
+        "+" => NodeSyntaxKind::Token(RSyntaxKind::PLUS),
 
         // Comment
         "comment" => NodeSyntaxKind::Comment,

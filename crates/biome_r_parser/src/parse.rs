@@ -104,9 +104,13 @@ impl<'src> RWalk<'src> {
                             // We handle comments on `Leave`
                             ()
                         }
-                        NodeSyntaxKind::Leaf(_) => {
-                            // We handle leaves on `Leave`
+                        NodeSyntaxKind::Token(_) => {
+                            // We handle tokens on `Leave`
                             ()
+                        }
+                        NodeSyntaxKind::Value(kind, _) => {
+                            // Open the node kind
+                            self.parse.start(kind);
                         }
                         NodeSyntaxKind::Node(kind) => {
                             self.parse.start(kind);
@@ -157,7 +161,7 @@ impl<'src> RWalk<'src> {
                             last_end = this_end;
                         }
 
-                        NodeSyntaxKind::Leaf(kind) => {
+                        NodeSyntaxKind::Token(kind) => {
                             // TODO!: Don't unwrap()
                             let this_start = TextSize::try_from(node.start_byte()).unwrap();
                             let this_end = TextSize::try_from(node.end_byte()).unwrap();
@@ -170,6 +174,29 @@ impl<'src> RWalk<'src> {
 
                             self.parse.derive_trivia(gap, last_end, before_first_token);
                             self.parse.token(kind, this_end);
+
+                            last_end = this_end;
+                            before_first_token = false;
+                        }
+
+                        NodeSyntaxKind::Value(_, kind) => {
+                            // TODO!: Don't unwrap()
+                            let this_start = TextSize::try_from(node.start_byte()).unwrap();
+                            let this_end = TextSize::try_from(node.end_byte()).unwrap();
+
+                            // TS gives us all tokens except trivia. So we know
+                            // all the relevant trivia tokens are laid out
+                            // between the last token's end and this token's
+                            // start.
+                            let gap = &self.text[usize::from(last_end)..usize::from(this_start)];
+
+                            self.parse.derive_trivia(gap, last_end, before_first_token);
+
+                            // Push the token
+                            self.parse.token(kind, this_end);
+
+                            // Then close the node
+                            self.parse.finish();
 
                             last_end = this_end;
                             before_first_token = false;
@@ -399,18 +426,28 @@ mod tests {
                 kind: RSyntaxKind::R_BINARY_EXPRESSION,
                 forward_parent: None,
             },
-            Event::Token {
+            Event::Start {
                 kind: RSyntaxKind::R_DOUBLE_VALUE,
+                forward_parent: None,
+            },
+            Event::Token {
+                kind: RSyntaxKind::R_DOUBLE_LITERAL,
                 end: TextSize::from(1),
             },
+            Event::Finish,
             Event::Token {
                 kind: RSyntaxKind::PLUS,
                 end: TextSize::from(2),
             },
-            Event::Token {
+            Event::Start {
                 kind: RSyntaxKind::R_DOUBLE_VALUE,
+                forward_parent: None,
+            },
+            Event::Token {
+                kind: RSyntaxKind::R_DOUBLE_LITERAL,
                 end: TextSize::from(3),
             },
+            Event::Finish,
             Event::Finish,
             Event::Finish,
             Event::Finish,
