@@ -4,8 +4,8 @@ use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
 use biome_diagnostics::DiagnosticExt;
 use biome_r_parser::{parse, RParserOptions};
-use biome_r_syntax::{AnyRExpression, RLanguage, RSyntaxNode};
-use biome_rowan::SyntaxKind;
+use biome_r_syntax::{AnyRExpression, RLanguage, RRoot, RSyntaxNode};
+use biome_rowan::{AstNode, SyntaxKind};
 use biome_test_utils::has_bogus_nodes_or_empty_slots;
 use std::fmt::Write;
 use std::fs;
@@ -39,7 +39,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
     let options = RParserOptions::default();
     let parsed = parse(&content, options);
-    let formatted_ast = format!("{:#?}", parsed.tree::<AnyRExpression>());
+    let root = RRoot::unwrap_cast(parsed.syntax());
+    let formatted_ast = format!("{:#?}", root);
 
     let mut snapshot = String::new();
     writeln!(snapshot, "\n## Input\n\n```css\n{content}\n```\n\n").unwrap();
@@ -131,8 +132,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"# foo
-1 + 1
-    "#;
+1 + 1"#;
 
     let root = parse(code, RParserOptions::default());
     let syntax: RSyntaxNode = root.syntax();
