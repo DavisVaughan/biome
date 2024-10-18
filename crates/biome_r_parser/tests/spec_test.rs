@@ -4,7 +4,7 @@ use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
 use biome_diagnostics::DiagnosticExt;
 use biome_r_parser::{parse, RParserOptions};
-use biome_r_syntax::{AnyRExpression, RLanguage, RRoot, RSyntaxNode};
+use biome_r_syntax::{RLanguage, RRoot, RSyntaxNode};
 use biome_rowan::{AstNode, SyntaxKind};
 use biome_test_utils::has_bogus_nodes_or_empty_slots;
 use std::fmt::Write;
@@ -43,7 +43,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let formatted_ast = format!("{:#?}", root);
 
     let mut snapshot = String::new();
-    writeln!(snapshot, "\n## Input\n\n```css\n{content}\n```\n\n").unwrap();
+    writeln!(snapshot, "\n## Input\n\n```R\n{content}\n```\n\n").unwrap();
 
     writeln!(
         snapshot,
