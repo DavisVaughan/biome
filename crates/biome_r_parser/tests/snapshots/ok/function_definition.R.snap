@@ -8,6 +8,9 @@ expression: snapshot
 function() 1
 function(a) a
 function(a, b) a + b
+function(
+  a # important!
+) a
 
 ```
 
@@ -75,17 +78,34 @@ RRoot {
                 },
             },
         },
+        RFunctionDefinition {
+            function_token: FUNCTION_KW@47..56 "function" [Newline("\n")] [],
+            parameters: RParameters {
+                l_paren_token: L_PAREN@56..57 "(" [] [],
+                items: RParameterList [
+                    RParameter {
+                        r_identifier: RIdentifier {
+                            name_token: IDENT@57..74 "a" [Newline("\n"), Whitespace("  ")] [Whitespace(" "), Comments("# important!")],
+                        },
+                    },
+                ],
+                r_paren_token: R_PAREN@74..76 ")" [Newline("\n")] [],
+            },
+            body: RIdentifier {
+                name_token: IDENT@76..78 "a" [Whitespace(" ")] [],
+            },
+        },
     ],
-    eof_token: EOF@47..48 "" [Newline("\n")] [],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: R_ROOT@0..48
+0: R_ROOT@0..79
   0: (empty)
-  1: R_EXPRESSION_LIST@0..47
+  1: R_EXPRESSION_LIST@0..78
     0: R_FUNCTION_DEFINITION@0..12
       0: FUNCTION_KW@0..8 "function" [] []
       1: R_PARAMETERS@8..10
@@ -124,6 +144,17 @@ RRoot {
         1: PLUS@43..45 "+" [Whitespace(" ")] []
         2: R_IDENTIFIER@45..47
           0: IDENT@45..47 "b" [Whitespace(" ")] []
-  2: EOF@47..48 "" [Newline("\n")] []
+    3: R_FUNCTION_DEFINITION@47..78
+      0: FUNCTION_KW@47..56 "function" [Newline("\n")] []
+      1: R_PARAMETERS@56..76
+        0: L_PAREN@56..57 "(" [] []
+        1: R_PARAMETER_LIST@57..74
+          0: R_PARAMETER@57..74
+            0: R_IDENTIFIER@57..74
+              0: IDENT@57..74 "a" [Newline("\n"), Whitespace("  ")] [Whitespace(" "), Comments("# important!")]
+        2: R_PAREN@74..76 ")" [Newline("\n")] []
+      2: R_IDENTIFIER@76..78
+        0: IDENT@76..78 "a" [Whitespace(" ")] []
+  2: EOF@78..79 "" [Newline("\n")] []
 
 ```
