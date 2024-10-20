@@ -111,6 +111,7 @@ impl<'src> RWalk<'src> {
             RSyntaxKind::R_BINARY_EXPRESSION => self.handle_node_enter(kind),
             RSyntaxKind::R_FUNCTION_DEFINITION => self.handle_node_enter(kind),
             RSyntaxKind::R_PARAMETERS => self.handle_parameters_enter(node, iter),
+            RSyntaxKind::R_PARAMETER => self.handle_node_enter(kind),
             RSyntaxKind::R_INTEGER_VALUE => self.handle_value_enter(kind),
             RSyntaxKind::R_DOUBLE_VALUE => self.handle_value_enter(kind),
             RSyntaxKind::R_STRING_VALUE => self.handle_value_enter(kind),
@@ -127,7 +128,6 @@ impl<'src> RWalk<'src> {
 
             // Unreachable directly
             RSyntaxKind::R_PARAMETER_LIST => unreachable!("{kind:?}"),
-            RSyntaxKind::R_PARAMETER => unreachable!("{kind:?}"),
             RSyntaxKind::R_EXPRESSION_LIST => unreachable!("{kind:?}"),
             RSyntaxKind::EOF => unreachable!("{kind:?}"),
             RSyntaxKind::UNICODE_BOM => unreachable!("{kind:?}"),
@@ -158,6 +158,7 @@ impl<'src> RWalk<'src> {
             RSyntaxKind::R_BINARY_EXPRESSION => self.handle_node_leave(),
             RSyntaxKind::R_FUNCTION_DEFINITION => self.handle_node_leave(),
             RSyntaxKind::R_PARAMETERS => self.handle_parameters_leave(),
+            RSyntaxKind::R_PARAMETER => self.handle_node_leave(),
             RSyntaxKind::R_INTEGER_VALUE => {
                 self.handle_value_leave(node, RSyntaxKind::R_INTEGER_LITERAL)
             }
@@ -182,7 +183,6 @@ impl<'src> RWalk<'src> {
 
             // Unreachable directly
             RSyntaxKind::R_PARAMETER_LIST => unreachable!("{kind:?}"),
-            RSyntaxKind::R_PARAMETER => unreachable!("{kind:?}"),
             RSyntaxKind::R_EXPRESSION_LIST => unreachable!("{kind:?}"),
             RSyntaxKind::EOF => unreachable!("{kind:?}"),
             RSyntaxKind::UNICODE_BOM => unreachable!("{kind:?}"),
