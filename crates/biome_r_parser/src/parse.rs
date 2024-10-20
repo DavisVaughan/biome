@@ -10,8 +10,8 @@ use biome_rowan::TriviaPieceKind;
 use biome_unicode_table::Dispatch;
 use tree_sitter::Tree;
 
-use crate::treesitter::NodeSyntaxKind;
 use crate::treesitter::NodeTypeExt;
+use crate::treesitter::Preorder;
 use crate::treesitter::WalkEvent;
 use crate::RLosslessTreeSink;
 use crate::RParserOptions;
@@ -67,176 +67,269 @@ fn parse_tree(
     ast: Tree,
     text: &str,
 ) -> (Vec<Event<RSyntaxKind>>, Vec<Trivia>, Vec<ParseDiagnostic>) {
-    let mut walker = RWalk::new(ast, text);
-    walker.walk();
+    let mut walker = RWalk::new(text);
+
+    let root = ast.root_node();
+    let mut iter = root.preorder();
+    walker.walk(&mut iter);
+
     walker.parse.drain()
 }
 
 /// Given an ast with absolutely no ERROR or MISSING nodes, let's walk that tree
 /// and collect our `trivia` and `events`.
 struct RWalk<'src> {
-    ast: Tree,
     text: &'src str,
     parse: RParse,
+    last_end: TextSize,
+    between_two_tokens: bool,
 }
 
 impl<'src> RWalk<'src> {
-    fn new(ast: Tree, text: &'src str) -> Self {
+    fn new(text: &'src str) -> Self {
         Self {
-            ast,
             text,
             parse: RParse::new(),
+            last_end: TextSize::from(0),
+            // Starts between the start of file and the first token
+            between_two_tokens: false,
         }
     }
 
-    fn walk(&mut self) {
-        let mut last_end = TextSize::from(0);
-
-        // We are currently between the start of file and the first token
-        let mut between_two_tokens = false;
-
-        let root = self.ast.root_node();
-        let mut iter = root.preorder();
-
+    fn walk(&mut self, iter: &mut Preorder) {
         while let Some(event) = iter.next() {
             match event {
-                WalkEvent::Enter(node) => {
-                    match node.syntax_kind() {
-                        NodeSyntaxKind::Comment => {
-                            // We handle comments on `Leave`
-                            ()
-                        }
-                        NodeSyntaxKind::Token(_) => {
-                            // We handle tokens on `Leave`
-                            ()
-                        }
-                        NodeSyntaxKind::Value(kind, _) => {
-                            // Open the node kind
-                            self.parse.start(kind);
-                        }
-                        NodeSyntaxKind::Node(kind) => {
-                            self.parse.start(kind);
-                            if kind == RSyntaxKind::R_ROOT {
-                                self.parse.push_event(Event::Start {
-                                    kind: RSyntaxKind::R_EXPRESSION_LIST,
-                                    forward_parent: None,
-                                });
-                            }
-                        }
-                    }
-                }
-                WalkEvent::Leave(node) => {
-                    match node.syntax_kind() {
-                        NodeSyntaxKind::Comment => {
-                            let this_start = TextSize::try_from(node.start_byte()).unwrap();
-                            let this_end = TextSize::try_from(node.end_byte()).unwrap();
-                            let gap = &self.text[usize::from(last_end)..usize::from(this_start)];
-
-                            let mut trailing = between_two_tokens;
-
-                            if gap.contains('\n') {
-                                // If the gap has a newline this is a leading comment
-                                trailing = false;
-                                self.parse.derive_trivia(gap, last_end, between_two_tokens);
-                            } else {
-                                // Otherwise we're just after a token and this is a trailing comment,
-                                // unless we are at the beginning of the document, in which case
-                                // the whitespace and comment are leading.
-                                //
-                                // We also make sure we don't add an empty whitespace trivia.
-                                if this_start != last_end {
-                                    self.parse.trivia.push(Trivia::new(
-                                        TriviaPieceKind::Whitespace,
-                                        TextRange::new(last_end, this_start),
-                                        trailing,
-                                    ));
-                                }
-                            }
-
-                            // Comments are "single line" even if they are consecutive
-                            self.parse.trivia.push(Trivia::new(
-                                TriviaPieceKind::SingleLineComment,
-                                TextRange::new(this_start, this_end),
-                                trailing,
-                            ));
-
-                            last_end = this_end;
-                        }
-
-                        NodeSyntaxKind::Token(kind) => {
-                            // TODO!: Don't unwrap()
-                            let this_start = TextSize::try_from(node.start_byte()).unwrap();
-                            let this_end = TextSize::try_from(node.end_byte()).unwrap();
-
-                            // TS gives us all tokens except trivia. So we know
-                            // all the relevant trivia tokens are laid out
-                            // between the last token's end and this token's
-                            // start.
-                            let gap = &self.text[usize::from(last_end)..usize::from(this_start)];
-
-                            self.parse.derive_trivia(gap, last_end, between_two_tokens);
-                            self.parse.token(kind, this_end);
-
-                            last_end = this_end;
-                            between_two_tokens = true;
-                        }
-
-                        NodeSyntaxKind::Value(_, kind) => {
-                            // TODO!: Don't unwrap()
-                            let this_start = TextSize::try_from(node.start_byte()).unwrap();
-                            let this_end = TextSize::try_from(node.end_byte()).unwrap();
-
-                            // TS gives us all tokens except trivia. So we know
-                            // all the relevant trivia tokens are laid out
-                            // between the last token's end and this token's
-                            // start.
-                            let gap = &self.text[usize::from(last_end)..usize::from(this_start)];
-
-                            self.parse.derive_trivia(gap, last_end, between_two_tokens);
-
-                            // Push the token
-                            self.parse.token(kind, this_end);
-
-                            // Then close the node
-                            self.parse.finish();
-
-                            last_end = this_end;
-                            between_two_tokens = true;
-                        }
-
-                        NodeSyntaxKind::Node(kind) => {
-                            match kind {
-                                RSyntaxKind::R_ROOT => {
-                                    // Finish expression list
-                                    self.parse.finish();
-
-                                    // No longer between two tokens.
-                                    // Now between last token and EOF.
-                                    between_two_tokens = false;
-
-                                    // TODO!: Don't unwrap()
-                                    let this_end = TextSize::try_from(node.end_byte()).unwrap();
-                                    let gap =
-                                        &self.text[usize::from(last_end)..usize::from(this_end)];
-
-                                    // Derive trivia between last token and end of document.
-                                    // It is always leading trivia of the `EOF` token,
-                                    // which `TreeSink` adds for us.
-                                    self.parse.derive_trivia(gap, last_end, between_two_tokens);
-
-                                    // Finish node
-                                    self.parse.finish();
-                                }
-                                _ => {
-                                    // Finish node
-                                    self.parse.finish();
-                                }
-                            }
-                        }
-                    }
-                }
+                WalkEvent::Enter(node) => self.handle_enter(node, node.syntax_kind()),
+                WalkEvent::Leave(node) => self.handle_leave(node, node.syntax_kind()),
             }
         }
+    }
+
+    fn handle_enter(&mut self, _node: tree_sitter::Node, kind: RSyntaxKind) {
+        match kind {
+            RSyntaxKind::R_ROOT => self.handle_root_enter(),
+            RSyntaxKind::R_BINARY_EXPRESSION => self.handle_node_enter(kind),
+            RSyntaxKind::R_FUNCTION_DEFINITION => self.handle_node_enter(kind),
+            RSyntaxKind::R_INTEGER_VALUE => self.handle_value_enter(kind),
+            RSyntaxKind::R_DOUBLE_VALUE => self.handle_value_enter(kind),
+            RSyntaxKind::R_STRING_VALUE => self.handle_value_enter(kind),
+            RSyntaxKind::R_LOGICAL_VALUE => self.handle_value_enter(kind),
+            RSyntaxKind::R_NULL_VALUE => self.handle_value_enter(kind),
+            RSyntaxKind::SEMICOLON => self.handle_token_enter(),
+            RSyntaxKind::PLUS => self.handle_token_enter(),
+            RSyntaxKind::COMMENT => self.handle_comment_enter(),
+
+            // Unreachable
+            RSyntaxKind::R_IDENTIFIER => unreachable!("{kind:?}"),
+            RSyntaxKind::R_PARAMETERS => unreachable!("{kind:?}"),
+            RSyntaxKind::R_PARAMETER_LIST => unreachable!("{kind:?}"),
+            RSyntaxKind::R_PARAMETER => unreachable!("{kind:?}"),
+            RSyntaxKind::R_EXPRESSION_LIST => unreachable!("{kind:?}"),
+            RSyntaxKind::EOF => unreachable!("{kind:?}"),
+            RSyntaxKind::UNICODE_BOM => unreachable!("{kind:?}"),
+            RSyntaxKind::COMMA => unreachable!("{kind:?}"),
+            RSyntaxKind::L_CURLY => unreachable!("{kind:?}"),
+            RSyntaxKind::R_CURLY => unreachable!("{kind:?}"),
+            RSyntaxKind::L_BRACK => unreachable!("{kind:?}"),
+            RSyntaxKind::R_BRACK => unreachable!("{kind:?}"),
+            RSyntaxKind::L_PAREN => unreachable!("{kind:?}"),
+            RSyntaxKind::R_PAREN => unreachable!("{kind:?}"),
+            RSyntaxKind::FUNCTION_KW => unreachable!("{kind:?}"),
+            RSyntaxKind::R_INTEGER_LITERAL => unreachable!("{kind:?}"),
+            RSyntaxKind::R_DOUBLE_LITERAL => unreachable!("{kind:?}"),
+            RSyntaxKind::R_STRING_LITERAL => unreachable!("{kind:?}"),
+            RSyntaxKind::R_LOGICAL_LITERAL => unreachable!("{kind:?}"),
+            RSyntaxKind::R_NULL_LITERAL => unreachable!("{kind:?}"),
+            RSyntaxKind::NEWLINE => unreachable!("{kind:?}"),
+            RSyntaxKind::WHITESPACE => unreachable!("{kind:?}"),
+            RSyntaxKind::IDENT => unreachable!("{kind:?}"),
+            RSyntaxKind::R_BOGUS => unreachable!("{kind:?}"),
+            RSyntaxKind::R_BOGUS_VALUE => unreachable!("{kind:?}"),
+            RSyntaxKind::R_BOGUS_EXPRESSION => unreachable!("{kind:?}"),
+            RSyntaxKind::R_BOGUS_PARAMETER => unreachable!("{kind:?}"),
+            RSyntaxKind::TOMBSTONE => unreachable!("{kind:?}"),
+            RSyntaxKind::__LAST => unreachable!("{kind:?}"),
+        }
+    }
+
+    fn handle_leave(&mut self, node: tree_sitter::Node, kind: RSyntaxKind) {
+        match kind {
+            RSyntaxKind::R_ROOT => self.handle_root_leave(node),
+            RSyntaxKind::R_BINARY_EXPRESSION => self.handle_node_leave(),
+            RSyntaxKind::R_FUNCTION_DEFINITION => self.handle_node_leave(),
+            RSyntaxKind::R_INTEGER_VALUE => {
+                self.handle_value_leave(node, RSyntaxKind::R_INTEGER_LITERAL)
+            }
+            RSyntaxKind::R_DOUBLE_VALUE => {
+                self.handle_value_leave(node, RSyntaxKind::R_DOUBLE_LITERAL)
+            }
+            RSyntaxKind::R_STRING_VALUE => {
+                self.handle_value_leave(node, RSyntaxKind::R_STRING_LITERAL)
+            }
+            RSyntaxKind::R_LOGICAL_VALUE => {
+                self.handle_value_leave(node, RSyntaxKind::R_LOGICAL_LITERAL)
+            }
+            RSyntaxKind::R_NULL_VALUE => self.handle_value_leave(node, RSyntaxKind::R_NULL_LITERAL),
+            RSyntaxKind::SEMICOLON => self.handle_token_leave(node, kind),
+            RSyntaxKind::PLUS => self.handle_token_leave(node, kind),
+            RSyntaxKind::COMMENT => self.handle_comment_leave(node),
+
+            // Unreachable
+            RSyntaxKind::R_IDENTIFIER => unreachable!("{kind:?}"),
+            RSyntaxKind::R_PARAMETERS => unreachable!("{kind:?}"),
+            RSyntaxKind::R_PARAMETER_LIST => unreachable!("{kind:?}"),
+            RSyntaxKind::R_PARAMETER => unreachable!("{kind:?}"),
+            RSyntaxKind::R_EXPRESSION_LIST => unreachable!("{kind:?}"),
+            RSyntaxKind::EOF => unreachable!("{kind:?}"),
+            RSyntaxKind::UNICODE_BOM => unreachable!("{kind:?}"),
+            RSyntaxKind::COMMA => unreachable!("{kind:?}"),
+            RSyntaxKind::L_CURLY => unreachable!("{kind:?}"),
+            RSyntaxKind::R_CURLY => unreachable!("{kind:?}"),
+            RSyntaxKind::L_BRACK => unreachable!("{kind:?}"),
+            RSyntaxKind::R_BRACK => unreachable!("{kind:?}"),
+            RSyntaxKind::L_PAREN => unreachable!("{kind:?}"),
+            RSyntaxKind::R_PAREN => unreachable!("{kind:?}"),
+            RSyntaxKind::FUNCTION_KW => unreachable!("{kind:?}"),
+            RSyntaxKind::R_INTEGER_LITERAL => unreachable!("{kind:?}"),
+            RSyntaxKind::R_DOUBLE_LITERAL => unreachable!("{kind:?}"),
+            RSyntaxKind::R_STRING_LITERAL => unreachable!("{kind:?}"),
+            RSyntaxKind::R_LOGICAL_LITERAL => unreachable!("{kind:?}"),
+            RSyntaxKind::R_NULL_LITERAL => unreachable!("{kind:?}"),
+            RSyntaxKind::NEWLINE => unreachable!("{kind:?}"),
+            RSyntaxKind::WHITESPACE => unreachable!("{kind:?}"),
+            RSyntaxKind::IDENT => unreachable!("{kind:?}"),
+            RSyntaxKind::R_BOGUS => unreachable!("{kind:?}"),
+            RSyntaxKind::R_BOGUS_VALUE => unreachable!("{kind:?}"),
+            RSyntaxKind::R_BOGUS_EXPRESSION => unreachable!("{kind:?}"),
+            RSyntaxKind::R_BOGUS_PARAMETER => unreachable!("{kind:?}"),
+            RSyntaxKind::TOMBSTONE => unreachable!("{kind:?}"),
+            RSyntaxKind::__LAST => unreachable!("{kind:?}"),
+        }
+    }
+
+    fn handle_node_enter(&mut self, kind: RSyntaxKind) {
+        self.parse.start(kind);
+    }
+
+    fn handle_node_leave(&mut self) {
+        self.parse.finish();
+    }
+
+    fn handle_value_enter(&mut self, kind: RSyntaxKind) {
+        self.handle_node_enter(kind);
+    }
+
+    fn handle_value_leave(&mut self, node: tree_sitter::Node, literal_kind: RSyntaxKind) {
+        // TODO!: Don't unwrap()
+        let this_start = TextSize::try_from(node.start_byte()).unwrap();
+        let this_end = TextSize::try_from(node.end_byte()).unwrap();
+        let gap = &self.text[usize::from(self.last_end)..usize::from(this_start)];
+
+        self.parse
+            .derive_trivia(gap, self.last_end, self.between_two_tokens);
+
+        // Push the token for the literal
+        self.parse.token(literal_kind, this_end);
+
+        // Then close the node
+        self.parse.finish();
+
+        self.last_end = this_end;
+        self.between_two_tokens = true;
+    }
+
+    fn handle_root_enter(&mut self) {
+        // Start the overarching root
+        self.handle_node_enter(RSyntaxKind::R_ROOT);
+
+        // TODO: Handle optional BOM?
+
+        // Root contains a list of `expressions`
+        self.parse.push_event(Event::Start {
+            kind: RSyntaxKind::R_EXPRESSION_LIST,
+            forward_parent: None,
+        });
+    }
+
+    fn handle_root_leave(&mut self, node: tree_sitter::Node) {
+        // Finish expression list
+        self.parse.finish();
+
+        // No longer between two tokens.
+        // Now between last token and EOF.
+        self.between_two_tokens = false;
+
+        // TODO!: Don't unwrap()
+        let this_end = TextSize::try_from(node.end_byte()).unwrap();
+        let gap = &self.text[usize::from(self.last_end)..usize::from(this_end)];
+
+        // Derive trivia between last token and end of document.
+        // It is always leading trivia of the `EOF` token,
+        // which `TreeSink` adds for us.
+        self.parse
+            .derive_trivia(gap, self.last_end, self.between_two_tokens);
+
+        self.handle_node_leave();
+    }
+
+    fn handle_token_enter(&mut self) {
+        // Nothing, handled on `Leave`
+    }
+
+    fn handle_token_leave(&mut self, node: tree_sitter::Node, kind: RSyntaxKind) {
+        // TODO!: Don't unwrap()
+        let this_start = TextSize::try_from(node.start_byte()).unwrap();
+        let this_end = TextSize::try_from(node.end_byte()).unwrap();
+        let gap = &self.text[usize::from(self.last_end)..usize::from(this_start)];
+
+        self.parse
+            .derive_trivia(gap, self.last_end, self.between_two_tokens);
+
+        self.parse.token(kind, this_end);
+
+        self.last_end = this_end;
+        self.between_two_tokens = true;
+    }
+
+    fn handle_comment_enter(&mut self) {
+        // Nothing, handled on `Leave`
+    }
+
+    fn handle_comment_leave(&mut self, node: tree_sitter::Node) {
+        let this_start = TextSize::try_from(node.start_byte()).unwrap();
+        let this_end = TextSize::try_from(node.end_byte()).unwrap();
+        let gap = &self.text[usize::from(self.last_end)..usize::from(this_start)];
+
+        let mut trailing = self.between_two_tokens;
+
+        if gap.contains('\n') {
+            // If the gap has a newline this is a leading comment
+            trailing = false;
+            self.parse
+                .derive_trivia(gap, self.last_end, self.between_two_tokens);
+        } else {
+            // Otherwise we're just after a token and this is a trailing comment,
+            // unless we are at the beginning of the document, in which case
+            // the whitespace and comment are leading.
+            //
+            // We also make sure we don't add an empty whitespace trivia.
+            if this_start != self.last_end {
+                self.parse.trivia.push(Trivia::new(
+                    TriviaPieceKind::Whitespace,
+                    TextRange::new(self.last_end, this_start),
+                    trailing,
+                ));
+            }
+        }
+
+        // Comments are "single line" even if they are consecutive
+        self.parse.trivia.push(Trivia::new(
+            TriviaPieceKind::SingleLineComment,
+            TextRange::new(this_start, this_end),
+            trailing,
+        ));
+
+        self.last_end = this_end;
     }
 }
 

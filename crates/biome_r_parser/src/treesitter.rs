@@ -353,63 +353,34 @@ impl<'tree> Iterator for Preorder<'tree> {
     }
 }
 
-pub enum NodeSyntaxKind {
-    /// An individual token
-    Token(RSyntaxKind),
-    /// A node that has children
-    Node(RSyntaxKind),
-    /// A token/node hybrid. For example, `1` is the node `R_DOUBLE_VALUE`,
-    /// but it also knows it holds the token `R_DOUBLE_TOKEN`.
-    Value(RSyntaxKind, RSyntaxKind),
-    Comment,
-}
-
-fn node_syntax_kind(x: &Node) -> NodeSyntaxKind {
+fn node_syntax_kind(x: &Node) -> RSyntaxKind {
     match x.kind() {
-        // Nodes
-        "program" => NodeSyntaxKind::Node(RSyntaxKind::R_ROOT),
-        "binary_operator" => NodeSyntaxKind::Node(RSyntaxKind::R_BINARY_EXPRESSION),
-        "function_definition" => NodeSyntaxKind::Node(RSyntaxKind::R_FUNCTION_DEFINITION),
-
-        // Values
-        "integer" => {
-            NodeSyntaxKind::Value(RSyntaxKind::R_INTEGER_VALUE, RSyntaxKind::R_INTEGER_LITERAL)
-        }
-        "float" => {
-            NodeSyntaxKind::Value(RSyntaxKind::R_DOUBLE_VALUE, RSyntaxKind::R_DOUBLE_LITERAL)
-        }
-        "string" => {
-            NodeSyntaxKind::Value(RSyntaxKind::R_STRING_VALUE, RSyntaxKind::R_STRING_LITERAL)
-        }
-        "true" => {
-            NodeSyntaxKind::Value(RSyntaxKind::R_LOGICAL_VALUE, RSyntaxKind::R_LOGICAL_LITERAL)
-        }
-        "false" => {
-            NodeSyntaxKind::Value(RSyntaxKind::R_LOGICAL_VALUE, RSyntaxKind::R_LOGICAL_LITERAL)
-        }
-        "null" => NodeSyntaxKind::Value(RSyntaxKind::R_NULL_VALUE, RSyntaxKind::R_NULL_LITERAL),
-
-        // Tokens
-        "{" => NodeSyntaxKind::Token(RSyntaxKind::L_CURLY),
-        "}" => NodeSyntaxKind::Token(RSyntaxKind::R_CURLY),
-        "[" => NodeSyntaxKind::Token(RSyntaxKind::L_BRACK),
-        "]" => NodeSyntaxKind::Token(RSyntaxKind::R_BRACK),
-        "+" => NodeSyntaxKind::Token(RSyntaxKind::PLUS),
-
-        // Comment
-        "comment" => NodeSyntaxKind::Comment,
-
-        _ => panic!("Not implemented"),
+        "program" => RSyntaxKind::R_ROOT,
+        "binary_operator" => RSyntaxKind::R_BINARY_EXPRESSION,
+        "function_definition" => RSyntaxKind::R_FUNCTION_DEFINITION,
+        "integer" => RSyntaxKind::R_INTEGER_VALUE,
+        "float" => RSyntaxKind::R_DOUBLE_VALUE,
+        "string" => RSyntaxKind::R_STRING_VALUE,
+        "true" => RSyntaxKind::R_LOGICAL_VALUE,
+        "false" => RSyntaxKind::R_LOGICAL_VALUE,
+        "null" => RSyntaxKind::R_NULL_VALUE,
+        "{" => RSyntaxKind::L_CURLY,
+        "}" => RSyntaxKind::R_CURLY,
+        "[" => RSyntaxKind::L_BRACK,
+        "]" => RSyntaxKind::R_BRACK,
+        "+" => RSyntaxKind::PLUS,
+        "comment" => RSyntaxKind::COMMENT,
+        _ => unreachable!("Not implemented."),
     }
 }
 
 pub trait NodeTypeExt: Sized {
-    fn syntax_kind(&self) -> NodeSyntaxKind;
+    fn syntax_kind(&self) -> RSyntaxKind;
     fn preorder(&self) -> Preorder;
 }
 
 impl NodeTypeExt for Node<'_> {
-    fn syntax_kind(&self) -> NodeSyntaxKind {
+    fn syntax_kind(&self) -> RSyntaxKind {
         node_syntax_kind(self)
     }
 
