@@ -7,6 +7,7 @@ expression: snapshot
 ```R
 function() 1
 function(a) a
+function(a, b) a + b
 
 ```
 
@@ -45,17 +46,46 @@ RRoot {
                 name_token: IDENT@24..26 "a" [Whitespace(" ")] [],
             },
         },
+        RFunctionDefinition {
+            function_token: FUNCTION_KW@26..35 "function" [Newline("\n")] [],
+            parameters: RParameters {
+                l_paren_token: L_PAREN@35..36 "(" [] [],
+                items: RParameterList [
+                    RParameter {
+                        r_identifier: RIdentifier {
+                            name_token: IDENT@36..37 "a" [] [],
+                        },
+                    },
+                    COMMA@37..38 "," [] [],
+                    RParameter {
+                        r_identifier: RIdentifier {
+                            name_token: IDENT@38..40 "b" [Whitespace(" ")] [],
+                        },
+                    },
+                ],
+                r_paren_token: R_PAREN@40..41 ")" [] [],
+            },
+            body: RBinaryExpression {
+                left: RIdentifier {
+                    name_token: IDENT@41..43 "a" [Whitespace(" ")] [],
+                },
+                operator_token_token: PLUS@43..45 "+" [Whitespace(" ")] [],
+                right: RIdentifier {
+                    name_token: IDENT@45..47 "b" [Whitespace(" ")] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@26..27 "" [Newline("\n")] [],
+    eof_token: EOF@47..48 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: R_ROOT@0..27
+0: R_ROOT@0..48
   0: (empty)
-  1: R_EXPRESSION_LIST@0..26
+  1: R_EXPRESSION_LIST@0..47
     0: R_FUNCTION_DEFINITION@0..12
       0: FUNCTION_KW@0..8 "function" [] []
       1: R_PARAMETERS@8..10
@@ -75,6 +105,25 @@ RRoot {
         2: R_PAREN@23..24 ")" [] []
       2: R_IDENTIFIER@24..26
         0: IDENT@24..26 "a" [Whitespace(" ")] []
-  2: EOF@26..27 "" [Newline("\n")] []
+    2: R_FUNCTION_DEFINITION@26..47
+      0: FUNCTION_KW@26..35 "function" [Newline("\n")] []
+      1: R_PARAMETERS@35..41
+        0: L_PAREN@35..36 "(" [] []
+        1: R_PARAMETER_LIST@36..40
+          0: R_PARAMETER@36..37
+            0: R_IDENTIFIER@36..37
+              0: IDENT@36..37 "a" [] []
+          1: COMMA@37..38 "," [] []
+          2: R_PARAMETER@38..40
+            0: R_IDENTIFIER@38..40
+              0: IDENT@38..40 "b" [Whitespace(" ")] []
+        2: R_PAREN@40..41 ")" [] []
+      2: R_BINARY_EXPRESSION@41..47
+        0: R_IDENTIFIER@41..43
+          0: IDENT@41..43 "a" [Whitespace(" ")] []
+        1: PLUS@43..45 "+" [Whitespace(" ")] []
+        2: R_IDENTIFIER@45..47
+          0: IDENT@45..47 "b" [Whitespace(" ")] []
+  2: EOF@47..48 "" [Newline("\n")] []
 
 ```

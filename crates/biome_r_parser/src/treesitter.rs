@@ -375,6 +375,7 @@ fn node_syntax_kind(x: &Node) -> RSyntaxKind {
         ")" => RSyntaxKind::R_PAREN,
         "+" => RSyntaxKind::PLUS,
         "function" => RSyntaxKind::FUNCTION_KW,
+        "comma" => RSyntaxKind::COMMA,
         "comment" => RSyntaxKind::COMMENT,
         kind => unreachable!("Not implemented: '{kind}'."),
     }
