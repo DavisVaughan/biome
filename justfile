@@ -139,6 +139,10 @@ test-transformation name:
 test-quick package:
   cargo test -p {{package}} --test quick_test -- quick_test --nocapture --ignored
 
+# Run the R parser and formatter tests
+test-r:
+  cargo test -p biome_r_parser
+  cargo test -p biome_r_formatter
 
 # Alias for `cargo lint`, it runs clippy on the whole codebase
 lint:
@@ -167,4 +171,3 @@ new-changeset:
 # Dry-run of the release
 dry-run-release *args='':
     knope release --dry-run {{args}}
-
