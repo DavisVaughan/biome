@@ -99,42 +99,42 @@ impl<'src> RWalk<'src> {
     fn walk(&mut self, iter: &mut Preorder) {
         while let Some(event) = iter.next() {
             match event {
-                WalkEvent::Enter(node) => self.handle_enter(node, node.syntax_kind()),
+                WalkEvent::Enter(node) => self.handle_enter(node, node.syntax_kind(), iter),
                 WalkEvent::Leave(node) => self.handle_leave(node, node.syntax_kind()),
             }
         }
     }
 
-    fn handle_enter(&mut self, _node: tree_sitter::Node, kind: RSyntaxKind) {
+    fn handle_enter(&mut self, node: tree_sitter::Node, kind: RSyntaxKind, iter: &mut Preorder) {
         match kind {
             RSyntaxKind::R_ROOT => self.handle_root_enter(),
             RSyntaxKind::R_BINARY_EXPRESSION => self.handle_node_enter(kind),
             RSyntaxKind::R_FUNCTION_DEFINITION => self.handle_node_enter(kind),
+            RSyntaxKind::R_PARAMETERS => self.handle_parameters_enter(node, iter),
             RSyntaxKind::R_INTEGER_VALUE => self.handle_value_enter(kind),
             RSyntaxKind::R_DOUBLE_VALUE => self.handle_value_enter(kind),
             RSyntaxKind::R_STRING_VALUE => self.handle_value_enter(kind),
             RSyntaxKind::R_LOGICAL_VALUE => self.handle_value_enter(kind),
             RSyntaxKind::R_NULL_VALUE => self.handle_value_enter(kind),
+            RSyntaxKind::R_IDENTIFIER => self.handle_value_enter(kind),
             RSyntaxKind::SEMICOLON => self.handle_token_enter(),
+            RSyntaxKind::COMMA => self.handle_token_enter(),
             RSyntaxKind::PLUS => self.handle_token_enter(),
+            RSyntaxKind::FUNCTION_KW => self.handle_token_enter(),
+            RSyntaxKind::L_PAREN => self.handle_token_enter(),
+            RSyntaxKind::R_PAREN => self.handle_token_enter(),
             RSyntaxKind::COMMENT => self.handle_comment_enter(),
 
-            // Unreachable
-            RSyntaxKind::R_IDENTIFIER => unreachable!("{kind:?}"),
-            RSyntaxKind::R_PARAMETERS => unreachable!("{kind:?}"),
+            // Unreachable directly
             RSyntaxKind::R_PARAMETER_LIST => unreachable!("{kind:?}"),
             RSyntaxKind::R_PARAMETER => unreachable!("{kind:?}"),
             RSyntaxKind::R_EXPRESSION_LIST => unreachable!("{kind:?}"),
             RSyntaxKind::EOF => unreachable!("{kind:?}"),
             RSyntaxKind::UNICODE_BOM => unreachable!("{kind:?}"),
-            RSyntaxKind::COMMA => unreachable!("{kind:?}"),
             RSyntaxKind::L_CURLY => unreachable!("{kind:?}"),
             RSyntaxKind::R_CURLY => unreachable!("{kind:?}"),
             RSyntaxKind::L_BRACK => unreachable!("{kind:?}"),
             RSyntaxKind::R_BRACK => unreachable!("{kind:?}"),
-            RSyntaxKind::L_PAREN => unreachable!("{kind:?}"),
-            RSyntaxKind::R_PAREN => unreachable!("{kind:?}"),
-            RSyntaxKind::FUNCTION_KW => unreachable!("{kind:?}"),
             RSyntaxKind::R_INTEGER_LITERAL => unreachable!("{kind:?}"),
             RSyntaxKind::R_DOUBLE_LITERAL => unreachable!("{kind:?}"),
             RSyntaxKind::R_STRING_LITERAL => unreachable!("{kind:?}"),
@@ -157,6 +157,7 @@ impl<'src> RWalk<'src> {
             RSyntaxKind::R_ROOT => self.handle_root_leave(node),
             RSyntaxKind::R_BINARY_EXPRESSION => self.handle_node_leave(),
             RSyntaxKind::R_FUNCTION_DEFINITION => self.handle_node_leave(),
+            RSyntaxKind::R_PARAMETERS => self.handle_parameters_leave(),
             RSyntaxKind::R_INTEGER_VALUE => {
                 self.handle_value_leave(node, RSyntaxKind::R_INTEGER_LITERAL)
             }
@@ -170,26 +171,25 @@ impl<'src> RWalk<'src> {
                 self.handle_value_leave(node, RSyntaxKind::R_LOGICAL_LITERAL)
             }
             RSyntaxKind::R_NULL_VALUE => self.handle_value_leave(node, RSyntaxKind::R_NULL_LITERAL),
+            RSyntaxKind::R_IDENTIFIER => self.handle_value_leave(node, RSyntaxKind::IDENT),
             RSyntaxKind::SEMICOLON => self.handle_token_leave(node, kind),
+            RSyntaxKind::COMMA => self.handle_token_leave(node, kind),
             RSyntaxKind::PLUS => self.handle_token_leave(node, kind),
+            RSyntaxKind::FUNCTION_KW => self.handle_token_leave(node, kind),
+            RSyntaxKind::L_PAREN => self.handle_token_leave(node, kind),
+            RSyntaxKind::R_PAREN => self.handle_token_leave(node, kind),
             RSyntaxKind::COMMENT => self.handle_comment_leave(node),
 
-            // Unreachable
-            RSyntaxKind::R_IDENTIFIER => unreachable!("{kind:?}"),
-            RSyntaxKind::R_PARAMETERS => unreachable!("{kind:?}"),
+            // Unreachable directly
             RSyntaxKind::R_PARAMETER_LIST => unreachable!("{kind:?}"),
             RSyntaxKind::R_PARAMETER => unreachable!("{kind:?}"),
             RSyntaxKind::R_EXPRESSION_LIST => unreachable!("{kind:?}"),
             RSyntaxKind::EOF => unreachable!("{kind:?}"),
             RSyntaxKind::UNICODE_BOM => unreachable!("{kind:?}"),
-            RSyntaxKind::COMMA => unreachable!("{kind:?}"),
             RSyntaxKind::L_CURLY => unreachable!("{kind:?}"),
             RSyntaxKind::R_CURLY => unreachable!("{kind:?}"),
             RSyntaxKind::L_BRACK => unreachable!("{kind:?}"),
             RSyntaxKind::R_BRACK => unreachable!("{kind:?}"),
-            RSyntaxKind::L_PAREN => unreachable!("{kind:?}"),
-            RSyntaxKind::R_PAREN => unreachable!("{kind:?}"),
-            RSyntaxKind::FUNCTION_KW => unreachable!("{kind:?}"),
             RSyntaxKind::R_INTEGER_LITERAL => unreachable!("{kind:?}"),
             RSyntaxKind::R_DOUBLE_LITERAL => unreachable!("{kind:?}"),
             RSyntaxKind::R_STRING_LITERAL => unreachable!("{kind:?}"),
@@ -330,6 +330,40 @@ impl<'src> RWalk<'src> {
         ));
 
         self.last_end = this_end;
+    }
+
+    fn handle_parameters_enter(&mut self, node: tree_sitter::Node, iter: &mut Preorder) {
+        // We handle all children directly
+        iter.skip_subtree();
+
+        self.handle_node_enter(RSyntaxKind::R_PARAMETERS);
+
+        let mut cursor = node.walk();
+
+        // Regardless of whether or not we see an `R_PARAMETER`, we have to
+        // open and close the required `R_PARAMETER_LIST`
+        for child in node.children(&mut cursor) {
+            let mut child_iter = child.preorder();
+
+            match child.syntax_kind() {
+                RSyntaxKind::L_PAREN => {
+                    self.walk(&mut child_iter);
+                    self.parse.start(RSyntaxKind::R_PARAMETER_LIST)
+                }
+                RSyntaxKind::R_PAREN => {
+                    self.parse.finish();
+                    self.walk(&mut child_iter);
+                }
+                RSyntaxKind::R_PARAMETER => self.walk(&mut child_iter),
+                RSyntaxKind::COMMA => self.walk(&mut child_iter),
+                RSyntaxKind::COMMENT => self.walk(&mut child_iter),
+                kind => unreachable!("{kind:?}"),
+            }
+        }
+    }
+
+    fn handle_parameters_leave(&mut self) {
+        self.handle_node_leave();
     }
 }
 
@@ -530,54 +564,6 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_smoke_test() {
-        let (events, trivia, _errors) = parse_text("1+1", RParserOptions::default());
-
-        let expect = vec![
-            Event::Start {
-                kind: RSyntaxKind::R_ROOT,
-                forward_parent: None,
-            },
-            Event::Start {
-                kind: RSyntaxKind::R_EXPRESSION_LIST,
-                forward_parent: None,
-            },
-            Event::Start {
-                kind: RSyntaxKind::R_BINARY_EXPRESSION,
-                forward_parent: None,
-            },
-            Event::Start {
-                kind: RSyntaxKind::R_DOUBLE_VALUE,
-                forward_parent: None,
-            },
-            Event::Token {
-                kind: RSyntaxKind::R_DOUBLE_LITERAL,
-                end: TextSize::from(1),
-            },
-            Event::Finish,
-            Event::Token {
-                kind: RSyntaxKind::PLUS,
-                end: TextSize::from(2),
-            },
-            Event::Start {
-                kind: RSyntaxKind::R_DOUBLE_VALUE,
-                forward_parent: None,
-            },
-            Event::Token {
-                kind: RSyntaxKind::R_DOUBLE_LITERAL,
-                end: TextSize::from(3),
-            },
-            Event::Finish,
-            Event::Finish,
-            Event::Finish,
-            Event::Finish,
-        ];
-
-        assert_eq!(events, expect);
-        assert!(trivia.is_empty());
-    }
-
-    #[test]
     fn test_parse_trivia_smoke_test() {
         assert_eq!(
             trivia("1 + 1"),
@@ -684,5 +670,111 @@ mod tests {
                 cmt(4, 5, Pos::Leading),
             ]
         );
+    }
+
+    #[test]
+    fn test_parse_smoke_test() {
+        let (events, trivia, _errors) = parse_text("1+1", RParserOptions::default());
+
+        let expect = vec![
+            Event::Start {
+                kind: RSyntaxKind::R_ROOT,
+                forward_parent: None,
+            },
+            Event::Start {
+                kind: RSyntaxKind::R_EXPRESSION_LIST,
+                forward_parent: None,
+            },
+            Event::Start {
+                kind: RSyntaxKind::R_BINARY_EXPRESSION,
+                forward_parent: None,
+            },
+            Event::Start {
+                kind: RSyntaxKind::R_DOUBLE_VALUE,
+                forward_parent: None,
+            },
+            Event::Token {
+                kind: RSyntaxKind::R_DOUBLE_LITERAL,
+                end: TextSize::from(1),
+            },
+            Event::Finish,
+            Event::Token {
+                kind: RSyntaxKind::PLUS,
+                end: TextSize::from(2),
+            },
+            Event::Start {
+                kind: RSyntaxKind::R_DOUBLE_VALUE,
+                forward_parent: None,
+            },
+            Event::Token {
+                kind: RSyntaxKind::R_DOUBLE_LITERAL,
+                end: TextSize::from(3),
+            },
+            Event::Finish,
+            Event::Finish,
+            Event::Finish,
+            Event::Finish,
+        ];
+
+        assert_eq!(events, expect);
+        assert!(trivia.is_empty());
+    }
+
+    #[test]
+    fn test_parse_function_definition() {
+        let (events, trivia, _errors) = parse_text("function() 1", RParserOptions::default());
+
+        let expect = vec![
+            Event::Start {
+                kind: RSyntaxKind::R_ROOT,
+                forward_parent: None,
+            },
+            Event::Start {
+                kind: RSyntaxKind::R_EXPRESSION_LIST,
+                forward_parent: None,
+            },
+            Event::Start {
+                kind: RSyntaxKind::R_FUNCTION_DEFINITION,
+                forward_parent: None,
+            },
+            Event::Token {
+                kind: RSyntaxKind::FUNCTION_KW,
+                end: TextSize::from(8),
+            },
+            Event::Start {
+                kind: RSyntaxKind::R_PARAMETERS,
+                forward_parent: None,
+            },
+            Event::Token {
+                kind: RSyntaxKind::L_PAREN,
+                end: TextSize::from(9),
+            },
+            Event::Start {
+                kind: RSyntaxKind::R_PARAMETER_LIST,
+                forward_parent: None,
+            },
+            Event::Finish, // R_PARAMETER_LIST
+            Event::Token {
+                kind: RSyntaxKind::R_PAREN,
+                end: TextSize::from(10),
+            },
+            Event::Finish, // R_PARAMETERS
+            Event::Start {
+                kind: RSyntaxKind::R_DOUBLE_VALUE,
+                forward_parent: None,
+            },
+            Event::Token {
+                kind: RSyntaxKind::R_DOUBLE_LITERAL,
+                end: TextSize::from(12),
+            },
+            Event::Finish, // R_DOUBLE_VALUE
+            Event::Finish, // R_FUNCTION_DEFINITION
+            Event::Finish, // R_EXPRESSION_LIST
+            Event::Finish, // R_ROOT
+        ];
+        assert_eq!(events, expect);
+
+        let expect = vec![ws(10, 11, Pos::Leading)];
+        assert_eq!(trivia, expect);
     }
 }

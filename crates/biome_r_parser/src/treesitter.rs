@@ -358,6 +358,9 @@ fn node_syntax_kind(x: &Node) -> RSyntaxKind {
         "program" => RSyntaxKind::R_ROOT,
         "binary_operator" => RSyntaxKind::R_BINARY_EXPRESSION,
         "function_definition" => RSyntaxKind::R_FUNCTION_DEFINITION,
+        "parameters" => RSyntaxKind::R_PARAMETERS,
+        "parameter" => RSyntaxKind::R_PARAMETER,
+        "identifier" => RSyntaxKind::R_IDENTIFIER,
         "integer" => RSyntaxKind::R_INTEGER_VALUE,
         "float" => RSyntaxKind::R_DOUBLE_VALUE,
         "string" => RSyntaxKind::R_STRING_VALUE,
@@ -368,9 +371,12 @@ fn node_syntax_kind(x: &Node) -> RSyntaxKind {
         "}" => RSyntaxKind::R_CURLY,
         "[" => RSyntaxKind::L_BRACK,
         "]" => RSyntaxKind::R_BRACK,
+        "(" => RSyntaxKind::L_PAREN,
+        ")" => RSyntaxKind::R_PAREN,
         "+" => RSyntaxKind::PLUS,
+        "function" => RSyntaxKind::FUNCTION_KW,
         "comment" => RSyntaxKind::COMMENT,
-        _ => unreachable!("Not implemented."),
+        kind => unreachable!("Not implemented: '{kind}'."),
     }
 }
 
