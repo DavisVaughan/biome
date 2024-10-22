@@ -359,7 +359,7 @@ fn node_syntax_kind(x: &Node) -> RSyntaxKind {
         "binary_operator" => RSyntaxKind::R_BINARY_EXPRESSION,
         "function_definition" => RSyntaxKind::R_FUNCTION_DEFINITION,
         "parameters" => RSyntaxKind::R_PARAMETERS,
-        "parameter" => RSyntaxKind::R_PARAMETER,
+        "parameter" => parameter_syntax_kind(x),
         "identifier" => RSyntaxKind::R_IDENTIFIER,
         "integer" => RSyntaxKind::R_INTEGER_VALUE,
         "float" => RSyntaxKind::R_DOUBLE_VALUE,
@@ -374,11 +374,54 @@ fn node_syntax_kind(x: &Node) -> RSyntaxKind {
         "(" => RSyntaxKind::L_PAREN,
         ")" => RSyntaxKind::R_PAREN,
         "+" => RSyntaxKind::PLUS,
+        "=" => equal_syntax_kind(x),
         "function" => RSyntaxKind::FUNCTION_KW,
         "comma" => RSyntaxKind::COMMA,
         "comment" => RSyntaxKind::COMMENT,
         kind => unreachable!("Not implemented: '{kind}'."),
     }
+}
+
+fn equal_syntax_kind(x: &Node) -> RSyntaxKind {
+    if x.is_named() {
+        unreachable!("Not implemented: named `=`.");
+    } else {
+        RSyntaxKind::EQUAL
+    }
+}
+
+/// Determine the specific `RSyntaxKind` of a `"parameter"` node
+///
+/// A parameter can be one of 3 kinds:
+/// - `function(x)` = R_IDENTIFIER_PARAMETER
+/// - `function(x = 5)` = R_DEFAULT_PARAMETER
+/// - `function(...)` = R_DOTS_PARAMETER
+///
+/// The tree-sitter grammar doesn't tell us which this is, but
+/// we can figure it out from the node structure.
+fn parameter_syntax_kind(x: &Node) -> RSyntaxKind {
+    // `name` is a mandatory field on all 3 variants
+    let name = x.child_by_field_name("name").unwrap();
+
+    if name.kind() == "dots" {
+        // Clearly `...`
+        return RSyntaxKind::R_DOTS_PARAMETER;
+    }
+
+    let mut cursor = x.walk();
+
+    // If a child is an anonymous `=`, must be default parameter
+    for child in x.children(&mut cursor) {
+        if child.is_named() {
+            continue;
+        }
+        if child.kind() != "=" {
+            continue;
+        }
+        return RSyntaxKind::R_DEFAULT_PARAMETER;
+    }
+
+    RSyntaxKind::R_IDENTIFIER_PARAMETER
 }
 
 pub trait NodeTypeExt: Sized {

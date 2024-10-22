@@ -68,6 +68,86 @@ pub struct RBinaryExpressionFields {
     pub right: SyntaxResult<AnyRExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RDefaultParameter {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RDefaultParameter {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RDefaultParameterFields {
+        RDefaultParameterFields {
+            name_token: self.name_token(),
+            eq_token: self.eq_token(),
+            default: self.default(),
+        }
+    }
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn eq_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn default(&self) -> Option<AnyRExpression> {
+        support::node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for RDefaultParameter {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RDefaultParameterFields {
+    pub name_token: SyntaxResult<SyntaxToken>,
+    pub eq_token: SyntaxResult<SyntaxToken>,
+    pub default: Option<AnyRExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RDotsParameter {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RDotsParameter {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RDotsParameterFields {
+        RDotsParameterFields {
+            name_token: self.name_token(),
+        }
+    }
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for RDotsParameter {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RDotsParameterFields {
+    pub name_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct RDoubleValue {
     pub(crate) syntax: SyntaxNode,
 }
@@ -183,6 +263,41 @@ pub struct RIdentifierFields {
     pub name_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct RIdentifierParameter {
+    pub(crate) syntax: SyntaxNode,
+}
+impl RIdentifierParameter {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> RIdentifierParameterFields {
+        RIdentifierParameterFields {
+            name_token: self.name_token(),
+        }
+    }
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for RIdentifierParameter {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct RIdentifierParameterFields {
+    pub name_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct RIntegerValue {
     pub(crate) syntax: SyntaxNode,
 }
@@ -286,41 +401,6 @@ impl Serialize for RNullValue {
 #[derive(Serialize)]
 pub struct RNullValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct RParameter {
-    pub(crate) syntax: SyntaxNode,
-}
-impl RParameter {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> RParameterFields {
-        RParameterFields {
-            r_identifier: self.r_identifier(),
-        }
-    }
-    pub fn r_identifier(&self) -> SyntaxResult<RIdentifier> {
-        support::required_node(&self.syntax, 0usize)
-    }
-}
-impl Serialize for RParameter {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct RParameterFields {
-    pub r_identifier: SyntaxResult<RIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct RParameters {
@@ -490,7 +570,9 @@ impl AnyRExpression {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyRParameter {
     RBogusParameter(RBogusParameter),
-    RParameter(RParameter),
+    RDefaultParameter(RDefaultParameter),
+    RDotsParameter(RDotsParameter),
+    RIdentifierParameter(RIdentifierParameter),
 }
 impl AnyRParameter {
     pub fn as_r_bogus_parameter(&self) -> Option<&RBogusParameter> {
@@ -499,9 +581,21 @@ impl AnyRParameter {
             _ => None,
         }
     }
-    pub fn as_r_parameter(&self) -> Option<&RParameter> {
+    pub fn as_r_default_parameter(&self) -> Option<&RDefaultParameter> {
         match &self {
-            AnyRParameter::RParameter(item) => Some(item),
+            AnyRParameter::RDefaultParameter(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_r_dots_parameter(&self) -> Option<&RDotsParameter> {
+        match &self {
+            AnyRParameter::RDotsParameter(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_r_identifier_parameter(&self) -> Option<&RIdentifierParameter> {
+        match &self {
+            AnyRParameter::RIdentifierParameter(item) => Some(item),
             _ => None,
         }
     }
@@ -593,6 +687,84 @@ impl From<RBinaryExpression> for SyntaxNode {
 }
 impl From<RBinaryExpression> for SyntaxElement {
     fn from(n: RBinaryExpression) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for RDefaultParameter {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_DEFAULT_PARAMETER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_DEFAULT_PARAMETER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RDefaultParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RDefaultParameter")
+            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+            .field("default", &support::DebugOptionalElement(self.default()))
+            .finish()
+    }
+}
+impl From<RDefaultParameter> for SyntaxNode {
+    fn from(n: RDefaultParameter) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RDefaultParameter> for SyntaxElement {
+    fn from(n: RDefaultParameter) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for RDotsParameter {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_DOTS_PARAMETER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_DOTS_PARAMETER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RDotsParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RDotsParameter")
+            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+            .finish()
+    }
+}
+impl From<RDotsParameter> for SyntaxNode {
+    fn from(n: RDotsParameter) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RDotsParameter> for SyntaxElement {
+    fn from(n: RDotsParameter) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -718,6 +890,44 @@ impl From<RIdentifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for RIdentifierParameter {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(R_IDENTIFIER_PARAMETER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == R_IDENTIFIER_PARAMETER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for RIdentifierParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RIdentifierParameter")
+            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+            .finish()
+    }
+}
+impl From<RIdentifierParameter> for SyntaxNode {
+    fn from(n: RIdentifierParameter) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<RIdentifierParameter> for SyntaxElement {
+    fn from(n: RIdentifierParameter) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for RIntegerValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -838,47 +1048,6 @@ impl From<RNullValue> for SyntaxNode {
 }
 impl From<RNullValue> for SyntaxElement {
     fn from(n: RNullValue) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for RParameter {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(R_PARAMETER as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == R_PARAMETER
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for RParameter {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("RParameter")
-            .field(
-                "r_identifier",
-                &support::DebugSyntaxResult(self.r_identifier()),
-            )
-            .finish()
-    }
-}
-impl From<RParameter> for SyntaxNode {
-    fn from(n: RParameter) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<RParameter> for SyntaxElement {
-    fn from(n: RParameter) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -1114,21 +1283,41 @@ impl From<RBogusParameter> for AnyRParameter {
         AnyRParameter::RBogusParameter(node)
     }
 }
-impl From<RParameter> for AnyRParameter {
-    fn from(node: RParameter) -> AnyRParameter {
-        AnyRParameter::RParameter(node)
+impl From<RDefaultParameter> for AnyRParameter {
+    fn from(node: RDefaultParameter) -> AnyRParameter {
+        AnyRParameter::RDefaultParameter(node)
+    }
+}
+impl From<RDotsParameter> for AnyRParameter {
+    fn from(node: RDotsParameter) -> AnyRParameter {
+        AnyRParameter::RDotsParameter(node)
+    }
+}
+impl From<RIdentifierParameter> for AnyRParameter {
+    fn from(node: RIdentifierParameter) -> AnyRParameter {
+        AnyRParameter::RIdentifierParameter(node)
     }
 }
 impl AstNode for AnyRParameter {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = RBogusParameter::KIND_SET.union(RParameter::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = RBogusParameter::KIND_SET
+        .union(RDefaultParameter::KIND_SET)
+        .union(RDotsParameter::KIND_SET)
+        .union(RIdentifierParameter::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, R_BOGUS_PARAMETER | R_PARAMETER)
+        matches!(
+            kind,
+            R_BOGUS_PARAMETER | R_DEFAULT_PARAMETER | R_DOTS_PARAMETER | R_IDENTIFIER_PARAMETER
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             R_BOGUS_PARAMETER => AnyRParameter::RBogusParameter(RBogusParameter { syntax }),
-            R_PARAMETER => AnyRParameter::RParameter(RParameter { syntax }),
+            R_DEFAULT_PARAMETER => AnyRParameter::RDefaultParameter(RDefaultParameter { syntax }),
+            R_DOTS_PARAMETER => AnyRParameter::RDotsParameter(RDotsParameter { syntax }),
+            R_IDENTIFIER_PARAMETER => {
+                AnyRParameter::RIdentifierParameter(RIdentifierParameter { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -1136,13 +1325,17 @@ impl AstNode for AnyRParameter {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyRParameter::RBogusParameter(it) => &it.syntax,
-            AnyRParameter::RParameter(it) => &it.syntax,
+            AnyRParameter::RDefaultParameter(it) => &it.syntax,
+            AnyRParameter::RDotsParameter(it) => &it.syntax,
+            AnyRParameter::RIdentifierParameter(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyRParameter::RBogusParameter(it) => it.syntax,
-            AnyRParameter::RParameter(it) => it.syntax,
+            AnyRParameter::RDefaultParameter(it) => it.syntax,
+            AnyRParameter::RDotsParameter(it) => it.syntax,
+            AnyRParameter::RIdentifierParameter(it) => it.syntax,
         }
     }
 }
@@ -1150,7 +1343,9 @@ impl std::fmt::Debug for AnyRParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyRParameter::RBogusParameter(it) => std::fmt::Debug::fmt(it, f),
-            AnyRParameter::RParameter(it) => std::fmt::Debug::fmt(it, f),
+            AnyRParameter::RDefaultParameter(it) => std::fmt::Debug::fmt(it, f),
+            AnyRParameter::RDotsParameter(it) => std::fmt::Debug::fmt(it, f),
+            AnyRParameter::RIdentifierParameter(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -1158,7 +1353,9 @@ impl From<AnyRParameter> for SyntaxNode {
     fn from(n: AnyRParameter) -> SyntaxNode {
         match n {
             AnyRParameter::RBogusParameter(it) => it.into(),
-            AnyRParameter::RParameter(it) => it.into(),
+            AnyRParameter::RDefaultParameter(it) => it.into(),
+            AnyRParameter::RDotsParameter(it) => it.into(),
+            AnyRParameter::RIdentifierParameter(it) => it.into(),
         }
     }
 }
@@ -1300,6 +1497,16 @@ impl std::fmt::Display for RBinaryExpression {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for RDefaultParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for RDotsParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for RDoubleValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -1315,6 +1522,11 @@ impl std::fmt::Display for RIdentifier {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for RIdentifierParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for RIntegerValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -1326,11 +1538,6 @@ impl std::fmt::Display for RLogicalValue {
     }
 }
 impl std::fmt::Display for RNullValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for RParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

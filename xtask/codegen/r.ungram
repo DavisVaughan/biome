@@ -72,12 +72,19 @@ RParameters =
 RParameterList = (AnyRParameter (',' AnyRParameter)*)
 
 AnyRParameter =
-	RParameter
+	RIdentifierParameter
+	| RDotsParameter
+	| RDefaultParameter
 	| RBogusParameter
 
-// TODO: Default values
-// TODO: `...` as a parameter
-RParameter = RIdentifier
+RIdentifierParameter = name: 'ident'
+
+RDotsParameter = name: '...'
+
+RDefaultParameter =
+	name: 'ident'
+	'='
+	default: AnyRExpression?
 
 // ----------------------------------------------------------------
 // Expression

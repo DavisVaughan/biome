@@ -9,7 +9,9 @@ impl FormatRule<AnyRParameter> for FormatAnyRParameter {
     fn fmt(&self, node: &AnyRParameter, f: &mut RFormatter) -> FormatResult<()> {
         match node {
             AnyRParameter::RBogusParameter(node) => node.format().fmt(f),
-            AnyRParameter::RParameter(node) => node.format().fmt(f),
+            AnyRParameter::RDefaultParameter(node) => node.format().fmt(f),
+            AnyRParameter::RDotsParameter(node) => node.format().fmt(f),
+            AnyRParameter::RIdentifierParameter(node) => node.format().fmt(f),
         }
     }
 }

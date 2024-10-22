@@ -47,6 +47,8 @@ impl biome_rowan::SyntaxKind for RSyntaxKind {
             | RSyntaxKind::L_PAREN
             | RSyntaxKind::R_PAREN
             | RSyntaxKind::PLUS
+            | RSyntaxKind::EQUAL
+            | RSyntaxKind::DOTS
             | RSyntaxKind::FUNCTION_KW
             | RSyntaxKind::R_INTEGER_LITERAL
             | RSyntaxKind::R_DOUBLE_LITERAL
@@ -63,7 +65,9 @@ impl biome_rowan::SyntaxKind for RSyntaxKind {
             | RSyntaxKind::R_FUNCTION_DEFINITION
             | RSyntaxKind::R_PARAMETERS
             | RSyntaxKind::R_PARAMETER_LIST
-            | RSyntaxKind::R_PARAMETER
+            | RSyntaxKind::R_DOTS_PARAMETER
+            | RSyntaxKind::R_IDENTIFIER_PARAMETER
+            | RSyntaxKind::R_DEFAULT_PARAMETER
             | RSyntaxKind::R_EXPRESSION_LIST
             | RSyntaxKind::R_INTEGER_VALUE
             | RSyntaxKind::R_DOUBLE_VALUE
@@ -85,7 +89,9 @@ impl biome_rowan::SyntaxKind for RSyntaxKind {
             RSyntaxKind::R_BOGUS_VALUE => RSyntaxKind::R_BOGUS_VALUE,
 
             // Bogus parameter
-            RSyntaxKind::R_PARAMETER => RSyntaxKind::R_BOGUS_PARAMETER,
+            RSyntaxKind::R_DOTS_PARAMETER => RSyntaxKind::R_BOGUS_PARAMETER,
+            RSyntaxKind::R_IDENTIFIER_PARAMETER => RSyntaxKind::R_BOGUS_PARAMETER,
+            RSyntaxKind::R_DEFAULT_PARAMETER => RSyntaxKind::R_BOGUS_PARAMETER,
             RSyntaxKind::R_BOGUS_PARAMETER => RSyntaxKind::R_BOGUS_PARAMETER,
 
             // Bogus expression
@@ -105,6 +111,8 @@ impl biome_rowan::SyntaxKind for RSyntaxKind {
             RSyntaxKind::L_PAREN => RSyntaxKind::R_BOGUS,
             RSyntaxKind::R_PAREN => RSyntaxKind::R_BOGUS,
             RSyntaxKind::PLUS => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::EQUAL => RSyntaxKind::R_BOGUS,
+            RSyntaxKind::DOTS => RSyntaxKind::R_BOGUS,
             RSyntaxKind::FUNCTION_KW => RSyntaxKind::R_BOGUS,
             RSyntaxKind::R_INTEGER_LITERAL => RSyntaxKind::R_BOGUS,
             RSyntaxKind::R_DOUBLE_LITERAL => RSyntaxKind::R_BOGUS,

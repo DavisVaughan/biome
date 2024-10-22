@@ -44,6 +44,82 @@ impl IntoFormat<RFormatContext> for biome_r_syntax::RBinaryExpression {
         )
     }
 }
+impl FormatRule<biome_r_syntax::RDefaultParameter>
+    for crate::r::auxiliary::default_parameter::FormatRDefaultParameter
+{
+    type Context = RFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_r_syntax::RDefaultParameter,
+        f: &mut RFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_r_syntax::RDefaultParameter>::fmt(self, node, f)
+    }
+}
+impl AsFormat<RFormatContext> for biome_r_syntax::RDefaultParameter {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_r_syntax::RDefaultParameter,
+        crate::r::auxiliary::default_parameter::FormatRDefaultParameter,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::r::auxiliary::default_parameter::FormatRDefaultParameter::default(),
+        )
+    }
+}
+impl IntoFormat<RFormatContext> for biome_r_syntax::RDefaultParameter {
+    type Format = FormatOwnedWithRule<
+        biome_r_syntax::RDefaultParameter,
+        crate::r::auxiliary::default_parameter::FormatRDefaultParameter,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::r::auxiliary::default_parameter::FormatRDefaultParameter::default(),
+        )
+    }
+}
+impl FormatRule<biome_r_syntax::RDotsParameter>
+    for crate::r::auxiliary::dots_parameter::FormatRDotsParameter
+{
+    type Context = RFormatContext;
+    #[inline(always)]
+    fn fmt(&self, node: &biome_r_syntax::RDotsParameter, f: &mut RFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_r_syntax::RDotsParameter>::fmt(self, node, f)
+    }
+}
+impl AsFormat<RFormatContext> for biome_r_syntax::RDotsParameter {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_r_syntax::RDotsParameter,
+        crate::r::auxiliary::dots_parameter::FormatRDotsParameter,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::r::auxiliary::dots_parameter::FormatRDotsParameter::default(),
+        )
+    }
+}
+impl IntoFormat<RFormatContext> for biome_r_syntax::RDotsParameter {
+    type Format = FormatOwnedWithRule<
+        biome_r_syntax::RDotsParameter,
+        crate::r::auxiliary::dots_parameter::FormatRDotsParameter,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::r::auxiliary::dots_parameter::FormatRDotsParameter::default(),
+        )
+    }
+}
 impl FormatRule<biome_r_syntax::RDoubleValue>
     for crate::r::auxiliary::double_value::FormatRDoubleValue
 {
@@ -156,6 +232,46 @@ impl IntoFormat<RFormatContext> for biome_r_syntax::RIdentifier {
         )
     }
 }
+impl FormatRule<biome_r_syntax::RIdentifierParameter>
+    for crate::r::auxiliary::identifier_parameter::FormatRIdentifierParameter
+{
+    type Context = RFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_r_syntax::RIdentifierParameter,
+        f: &mut RFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_r_syntax::RIdentifierParameter>::fmt(self, node, f)
+    }
+}
+impl AsFormat<RFormatContext> for biome_r_syntax::RIdentifierParameter {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_r_syntax::RIdentifierParameter,
+        crate::r::auxiliary::identifier_parameter::FormatRIdentifierParameter,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::r::auxiliary::identifier_parameter::FormatRIdentifierParameter::default(),
+        )
+    }
+}
+impl IntoFormat<RFormatContext> for biome_r_syntax::RIdentifierParameter {
+    type Format = FormatOwnedWithRule<
+        biome_r_syntax::RIdentifierParameter,
+        crate::r::auxiliary::identifier_parameter::FormatRIdentifierParameter,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::r::auxiliary::identifier_parameter::FormatRIdentifierParameter::default(),
+        )
+    }
+}
 impl FormatRule<biome_r_syntax::RIntegerValue>
     for crate::r::auxiliary::integer_value::FormatRIntegerValue
 {
@@ -259,40 +375,6 @@ impl IntoFormat<RFormatContext> for biome_r_syntax::RNullValue {
         FormatOwnedWithRule::new(
             self,
             crate::r::auxiliary::null_value::FormatRNullValue::default(),
-        )
-    }
-}
-impl FormatRule<biome_r_syntax::RParameter> for crate::r::auxiliary::parameter::FormatRParameter {
-    type Context = RFormatContext;
-    #[inline(always)]
-    fn fmt(&self, node: &biome_r_syntax::RParameter, f: &mut RFormatter) -> FormatResult<()> {
-        FormatNodeRule::<biome_r_syntax::RParameter>::fmt(self, node, f)
-    }
-}
-impl AsFormat<RFormatContext> for biome_r_syntax::RParameter {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_r_syntax::RParameter,
-        crate::r::auxiliary::parameter::FormatRParameter,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::r::auxiliary::parameter::FormatRParameter::default(),
-        )
-    }
-}
-impl IntoFormat<RFormatContext> for biome_r_syntax::RParameter {
-    type Format = FormatOwnedWithRule<
-        biome_r_syntax::RParameter,
-        crate::r::auxiliary::parameter::FormatRParameter,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::r::auxiliary::parameter::FormatRParameter::default(),
         )
     }
 }

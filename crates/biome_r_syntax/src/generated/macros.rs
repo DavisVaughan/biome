@@ -20,6 +20,14 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::RBinaryExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::RSyntaxKind::R_DEFAULT_PARAMETER => {
+                    let $pattern = unsafe { $crate::RDefaultParameter::new_unchecked(node) };
+                    $body
+                }
+                $crate::RSyntaxKind::R_DOTS_PARAMETER => {
+                    let $pattern = unsafe { $crate::RDotsParameter::new_unchecked(node) };
+                    $body
+                }
                 $crate::RSyntaxKind::R_DOUBLE_VALUE => {
                     let $pattern = unsafe { $crate::RDoubleValue::new_unchecked(node) };
                     $body
@@ -32,6 +40,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::RIdentifier::new_unchecked(node) };
                     $body
                 }
+                $crate::RSyntaxKind::R_IDENTIFIER_PARAMETER => {
+                    let $pattern = unsafe { $crate::RIdentifierParameter::new_unchecked(node) };
+                    $body
+                }
                 $crate::RSyntaxKind::R_INTEGER_VALUE => {
                     let $pattern = unsafe { $crate::RIntegerValue::new_unchecked(node) };
                     $body
@@ -42,10 +54,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::RSyntaxKind::R_NULL_VALUE => {
                     let $pattern = unsafe { $crate::RNullValue::new_unchecked(node) };
-                    $body
-                }
-                $crate::RSyntaxKind::R_PARAMETER => {
-                    let $pattern = unsafe { $crate::RParameter::new_unchecked(node) };
                     $body
                 }
                 $crate::RSyntaxKind::R_PARAMETERS => {

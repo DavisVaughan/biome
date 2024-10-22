@@ -20,6 +20,44 @@ pub fn r_binary_expression(
         ],
     ))
 }
+pub fn r_default_parameter(
+    name_token: SyntaxToken,
+    eq_token: SyntaxToken,
+) -> RDefaultParameterBuilder {
+    RDefaultParameterBuilder {
+        name_token,
+        eq_token,
+        default: None,
+    }
+}
+pub struct RDefaultParameterBuilder {
+    name_token: SyntaxToken,
+    eq_token: SyntaxToken,
+    default: Option<AnyRExpression>,
+}
+impl RDefaultParameterBuilder {
+    pub fn with_default(mut self, default: AnyRExpression) -> Self {
+        self.default = Some(default);
+        self
+    }
+    pub fn build(self) -> RDefaultParameter {
+        RDefaultParameter::unwrap_cast(SyntaxNode::new_detached(
+            RSyntaxKind::R_DEFAULT_PARAMETER,
+            [
+                Some(SyntaxElement::Token(self.name_token)),
+                Some(SyntaxElement::Token(self.eq_token)),
+                self.default
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn r_dots_parameter(name_token: SyntaxToken) -> RDotsParameter {
+    RDotsParameter::unwrap_cast(SyntaxNode::new_detached(
+        RSyntaxKind::R_DOTS_PARAMETER,
+        [Some(SyntaxElement::Token(name_token))],
+    ))
+}
 pub fn r_double_value(value_token: SyntaxToken) -> RDoubleValue {
     RDoubleValue::unwrap_cast(SyntaxNode::new_detached(
         RSyntaxKind::R_DOUBLE_VALUE,
@@ -46,6 +84,12 @@ pub fn r_identifier(name_token: SyntaxToken) -> RIdentifier {
         [Some(SyntaxElement::Token(name_token))],
     ))
 }
+pub fn r_identifier_parameter(name_token: SyntaxToken) -> RIdentifierParameter {
+    RIdentifierParameter::unwrap_cast(SyntaxNode::new_detached(
+        RSyntaxKind::R_IDENTIFIER_PARAMETER,
+        [Some(SyntaxElement::Token(name_token))],
+    ))
+}
 pub fn r_integer_value(value_token: SyntaxToken) -> RIntegerValue {
     RIntegerValue::unwrap_cast(SyntaxNode::new_detached(
         RSyntaxKind::R_INTEGER_VALUE,
@@ -62,12 +106,6 @@ pub fn r_null_value(value_token: SyntaxToken) -> RNullValue {
     RNullValue::unwrap_cast(SyntaxNode::new_detached(
         RSyntaxKind::R_NULL_VALUE,
         [Some(SyntaxElement::Token(value_token))],
-    ))
-}
-pub fn r_parameter(r_identifier: RIdentifier) -> RParameter {
-    RParameter::unwrap_cast(SyntaxNode::new_detached(
-        RSyntaxKind::R_PARAMETER,
-        [Some(SyntaxElement::Node(r_identifier.into_syntax()))],
     ))
 }
 pub fn r_parameters(

@@ -111,19 +111,26 @@ impl<'src> RWalk<'src> {
             RSyntaxKind::R_BINARY_EXPRESSION => self.handle_node_enter(kind),
             RSyntaxKind::R_FUNCTION_DEFINITION => self.handle_node_enter(kind),
             RSyntaxKind::R_PARAMETERS => self.handle_parameters_enter(node, iter),
-            RSyntaxKind::R_PARAMETER => self.handle_node_enter(kind),
+            RSyntaxKind::R_DOTS_PARAMETER => self.handle_dots_parameter_enter(iter),
+            RSyntaxKind::R_IDENTIFIER_PARAMETER => self.handle_identifier_parameter_enter(iter),
+            RSyntaxKind::R_DEFAULT_PARAMETER => self.handle_default_parameter_enter(node, iter),
             RSyntaxKind::R_INTEGER_VALUE => self.handle_value_enter(kind),
             RSyntaxKind::R_DOUBLE_VALUE => self.handle_value_enter(kind),
             RSyntaxKind::R_STRING_VALUE => self.handle_value_enter(kind),
             RSyntaxKind::R_LOGICAL_VALUE => self.handle_value_enter(kind),
             RSyntaxKind::R_NULL_VALUE => self.handle_value_enter(kind),
             RSyntaxKind::R_IDENTIFIER => self.handle_value_enter(kind),
-            RSyntaxKind::SEMICOLON => self.handle_token_enter(),
-            RSyntaxKind::COMMA => self.handle_token_enter(),
-            RSyntaxKind::PLUS => self.handle_token_enter(),
-            RSyntaxKind::FUNCTION_KW => self.handle_token_enter(),
-            RSyntaxKind::L_PAREN => self.handle_token_enter(),
-            RSyntaxKind::R_PAREN => self.handle_token_enter(),
+
+            // Tokens are no-ops on `Enter`, handled on `Leave`
+            RSyntaxKind::SEMICOLON => (),
+            RSyntaxKind::COMMA => (),
+            RSyntaxKind::PLUS => (),
+            RSyntaxKind::EQUAL => (),
+            RSyntaxKind::FUNCTION_KW => (),
+            RSyntaxKind::L_PAREN => (),
+            RSyntaxKind::R_PAREN => (),
+
+            // Comments
             RSyntaxKind::COMMENT => self.handle_comment_enter(),
 
             // Unreachable directly
@@ -135,6 +142,7 @@ impl<'src> RWalk<'src> {
             RSyntaxKind::R_CURLY => unreachable!("{kind:?}"),
             RSyntaxKind::L_BRACK => unreachable!("{kind:?}"),
             RSyntaxKind::R_BRACK => unreachable!("{kind:?}"),
+            RSyntaxKind::DOTS => unreachable!("{kind:?}"),
             RSyntaxKind::R_INTEGER_LITERAL => unreachable!("{kind:?}"),
             RSyntaxKind::R_DOUBLE_LITERAL => unreachable!("{kind:?}"),
             RSyntaxKind::R_STRING_LITERAL => unreachable!("{kind:?}"),
@@ -158,7 +166,9 @@ impl<'src> RWalk<'src> {
             RSyntaxKind::R_BINARY_EXPRESSION => self.handle_node_leave(),
             RSyntaxKind::R_FUNCTION_DEFINITION => self.handle_node_leave(),
             RSyntaxKind::R_PARAMETERS => self.handle_parameters_leave(),
-            RSyntaxKind::R_PARAMETER => self.handle_node_leave(),
+            RSyntaxKind::R_DOTS_PARAMETER => self.handle_dots_parameter_leave(node),
+            RSyntaxKind::R_IDENTIFIER_PARAMETER => self.handle_identifier_parameter_leave(node),
+            RSyntaxKind::R_DEFAULT_PARAMETER => self.handle_default_parameter_leave(),
             RSyntaxKind::R_INTEGER_VALUE => {
                 self.handle_value_leave(node, RSyntaxKind::R_INTEGER_LITERAL)
             }
@@ -173,12 +183,15 @@ impl<'src> RWalk<'src> {
             }
             RSyntaxKind::R_NULL_VALUE => self.handle_value_leave(node, RSyntaxKind::R_NULL_LITERAL),
             RSyntaxKind::R_IDENTIFIER => self.handle_value_leave(node, RSyntaxKind::IDENT),
-            RSyntaxKind::SEMICOLON => self.handle_token_leave(node, kind),
-            RSyntaxKind::COMMA => self.handle_token_leave(node, kind),
-            RSyntaxKind::PLUS => self.handle_token_leave(node, kind),
-            RSyntaxKind::FUNCTION_KW => self.handle_token_leave(node, kind),
-            RSyntaxKind::L_PAREN => self.handle_token_leave(node, kind),
-            RSyntaxKind::R_PAREN => self.handle_token_leave(node, kind),
+
+            // Tokens
+            RSyntaxKind::SEMICOLON => self.handle_token(node, kind),
+            RSyntaxKind::COMMA => self.handle_token(node, kind),
+            RSyntaxKind::PLUS => self.handle_token(node, kind),
+            RSyntaxKind::EQUAL => self.handle_token(node, kind),
+            RSyntaxKind::FUNCTION_KW => self.handle_token(node, kind),
+            RSyntaxKind::L_PAREN => self.handle_token(node, kind),
+            RSyntaxKind::R_PAREN => self.handle_token(node, kind),
             RSyntaxKind::COMMENT => self.handle_comment_leave(node),
 
             // Unreachable directly
@@ -190,6 +203,7 @@ impl<'src> RWalk<'src> {
             RSyntaxKind::R_CURLY => unreachable!("{kind:?}"),
             RSyntaxKind::L_BRACK => unreachable!("{kind:?}"),
             RSyntaxKind::R_BRACK => unreachable!("{kind:?}"),
+            RSyntaxKind::DOTS => unreachable!("{kind:?}"),
             RSyntaxKind::R_INTEGER_LITERAL => unreachable!("{kind:?}"),
             RSyntaxKind::R_DOUBLE_LITERAL => unreachable!("{kind:?}"),
             RSyntaxKind::R_STRING_LITERAL => unreachable!("{kind:?}"),
@@ -220,22 +234,11 @@ impl<'src> RWalk<'src> {
     }
 
     fn handle_value_leave(&mut self, node: tree_sitter::Node, literal_kind: RSyntaxKind) {
-        // TODO!: Don't unwrap()
-        let this_start = TextSize::try_from(node.start_byte()).unwrap();
-        let this_end = TextSize::try_from(node.end_byte()).unwrap();
-        let gap = &self.text[usize::from(self.last_end)..usize::from(this_start)];
-
-        self.parse
-            .derive_trivia(gap, self.last_end, self.between_two_tokens);
-
         // Push the token for the literal
-        self.parse.token(literal_kind, this_end);
+        self.handle_token(node, literal_kind);
 
         // Then close the node
-        self.parse.finish();
-
-        self.last_end = this_end;
-        self.between_two_tokens = true;
+        self.handle_node_leave();
     }
 
     fn handle_root_enter(&mut self) {
@@ -272,11 +275,7 @@ impl<'src> RWalk<'src> {
         self.handle_node_leave();
     }
 
-    fn handle_token_enter(&mut self) {
-        // Nothing, handled on `Leave`
-    }
-
-    fn handle_token_leave(&mut self, node: tree_sitter::Node, kind: RSyntaxKind) {
+    fn handle_token(&mut self, node: tree_sitter::Node, kind: RSyntaxKind) {
         // TODO!: Don't unwrap()
         let this_start = TextSize::try_from(node.start_byte()).unwrap();
         let this_end = TextSize::try_from(node.end_byte()).unwrap();
@@ -354,7 +353,9 @@ impl<'src> RWalk<'src> {
                     self.parse.finish();
                     self.walk(&mut child_iter);
                 }
-                RSyntaxKind::R_PARAMETER => self.walk(&mut child_iter),
+                RSyntaxKind::R_DOTS_PARAMETER => self.walk(&mut child_iter),
+                RSyntaxKind::R_IDENTIFIER_PARAMETER => self.walk(&mut child_iter),
+                RSyntaxKind::R_DEFAULT_PARAMETER => self.walk(&mut child_iter),
                 RSyntaxKind::COMMA => self.walk(&mut child_iter),
                 RSyntaxKind::COMMENT => self.walk(&mut child_iter),
                 kind => unreachable!("{kind:?}"),
@@ -363,6 +364,61 @@ impl<'src> RWalk<'src> {
     }
 
     fn handle_parameters_leave(&mut self) {
+        self.handle_node_leave();
+    }
+
+    fn handle_dots_parameter_enter(&mut self, iter: &mut Preorder) {
+        // Stop at TS `"parameter"`, don't recurse into single `"dots"` child,
+        // we know what this is.
+        iter.skip_subtree();
+
+        self.handle_node_enter(RSyntaxKind::R_DOTS_PARAMETER);
+    }
+
+    fn handle_dots_parameter_leave(&mut self, node: tree_sitter::Node) {
+        self.handle_token(node, RSyntaxKind::DOTS);
+
+        self.handle_node_leave();
+    }
+
+    fn handle_identifier_parameter_enter(&mut self, iter: &mut Preorder) {
+        // Stop at TS `"parameter"`, don't recurse into single `"identifier"` child,
+        // we know what this is.
+        iter.skip_subtree();
+
+        self.handle_node_enter(RSyntaxKind::R_IDENTIFIER_PARAMETER);
+    }
+
+    fn handle_identifier_parameter_leave(&mut self, node: tree_sitter::Node) {
+        self.handle_token(node, RSyntaxKind::IDENT);
+
+        self.handle_node_leave();
+    }
+
+    fn handle_default_parameter_enter(&mut self, node: tree_sitter::Node, iter: &mut Preorder) {
+        // Skip subtree, we will handle it
+        iter.skip_subtree();
+
+        self.handle_node_enter(RSyntaxKind::R_DEFAULT_PARAMETER);
+
+        let mut cursor = node.walk();
+
+        for child in node.children(&mut cursor) {
+            match child.syntax_kind() {
+                RSyntaxKind::R_IDENTIFIER => {
+                    // Push a simple `IDENT` instead
+                    self.handle_token(child, RSyntaxKind::IDENT);
+                }
+                _ => {
+                    // `=`, and RHS of default parameter (i.e. any R expression)
+                    // are handled in the main loop
+                    self.walk(&mut child.preorder())
+                }
+            }
+        }
+    }
+
+    fn handle_default_parameter_leave(&mut self) {
         self.handle_node_leave();
     }
 }
