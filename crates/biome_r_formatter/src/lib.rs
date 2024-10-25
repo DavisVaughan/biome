@@ -23,6 +23,7 @@ pub mod context;
 mod cst;
 mod prelude;
 mod r;
+pub(crate) mod separated;
 
 #[rustfmt::skip]
 mod generated;

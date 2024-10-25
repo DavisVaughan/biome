@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: r/function_definition.R
+---
+# Input
+
+```R
+function() 1
+function(a, b) 1
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+-----
+
+```R
+function() 1
+function(a, b) 1
+```

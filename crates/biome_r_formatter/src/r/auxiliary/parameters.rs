@@ -1,10 +1,25 @@
 use crate::prelude::*;
+use crate::r::lists::parameter_list::FormatRAnyParameterList;
+use biome_formatter::write;
 use biome_r_syntax::RParameters;
-use biome_rowan::AstNode;
+use biome_r_syntax::RParametersFields;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatRParameters;
 impl FormatNodeRule<RParameters> for FormatRParameters {
     fn fmt_fields(&self, node: &RParameters, f: &mut RFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let RParametersFields {
+            l_paren_token,
+            items,
+            r_paren_token,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                l_paren_token.format(),
+                soft_block_indent(&FormatRAnyParameterList::new(&items)),
+                r_paren_token.format()
+            ]
+        )
     }
 }
