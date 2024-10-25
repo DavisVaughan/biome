@@ -20,7 +20,7 @@ RRoot {
             left: RDoubleValue {
                 value_token: R_DOUBLE_LITERAL@0..1 "1" [] [],
             },
-            operator_token_token: PLUS@1..3 "+" [Whitespace(" ")] [],
+            operator_token: PLUS@1..3 "+" [Whitespace(" ")] [],
             right: RDoubleValue {
                 value_token: R_DOUBLE_LITERAL@3..5 "2" [Whitespace(" ")] [],
             },

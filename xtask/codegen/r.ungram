@@ -50,7 +50,7 @@ RRoot =
 
 RBinaryExpression =
 	left: AnyRExpression
-    operator_token: (
+    operator: (
 		'+'
 	)
 	right: AnyRExpression
