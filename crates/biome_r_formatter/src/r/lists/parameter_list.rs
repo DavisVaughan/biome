@@ -6,26 +6,9 @@ use biome_r_syntax::RParameterList;
 pub(crate) struct FormatRParameterList;
 impl FormatRule<RParameterList> for FormatRParameterList {
     type Context = RFormatContext;
-    fn fmt(&self, _node: &RParameterList, _f: &mut RFormatter) -> FormatResult<()> {
-        unreachable!("Implemented through `RParameters` calling `FormatRAnyParameterList::new()` on the `RParameterList`");
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub(crate) struct FormatRAnyParameterList<'a> {
-    list: &'a RParameterList,
-}
-
-impl<'a> FormatRAnyParameterList<'a> {
-    pub fn new(list: &'a RParameterList) -> Self {
-        Self { list }
-    }
-}
-
-impl Format<RFormatContext> for FormatRAnyParameterList<'_> {
-    fn fmt(&self, f: &mut Formatter<RFormatContext>) -> FormatResult<()> {
+    fn fmt(&self, node: &RParameterList, f: &mut RFormatter) -> FormatResult<()> {
         let mut joiner = f.join_nodes_with_soft_line();
-        join_parameter_list(&mut joiner, &self.list)?;
+        join_parameter_list(&mut joiner, &node)?;
         joiner.finish()
     }
 }

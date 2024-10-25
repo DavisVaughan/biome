@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::r::lists::parameter_list::FormatRAnyParameterList;
 use biome_formatter::write;
 use biome_r_syntax::RParameters;
 use biome_r_syntax::RParametersFields;
@@ -17,7 +16,7 @@ impl FormatNodeRule<RParameters> for FormatRParameters {
             f,
             [
                 l_paren_token.format(),
-                soft_block_indent(&FormatRAnyParameterList::new(&items)),
+                soft_block_indent(&items.format()),
                 r_paren_token.format()
             ]
         )
